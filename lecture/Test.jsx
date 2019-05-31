@@ -46,7 +46,46 @@ div ref={this.onInputRef}
 자바스크립트는 20년전부터 지원함 ...
 
  */
+
+/*
+Render함수 내에서는 setState를 호출하면안된다.
+setState -> Render 순으로 호출되는데
+즉 무한반복됨..
+ */
+
+/*
+Props 는 자식이 바꿀수없고, 부모만이 변경이 가능하다.
+props를 변경해야하는 경우에는 자식의 state에 넣어주어 사용할것 (좋은구조는 아니다.)
+ */
+
+/*
+Context
+
+A -> b-> c -> d -> e
+b~d는 중간다리이지만 불필요함... 불필요한 랜더링이 될 위험을 내포하고있다!!
+
+a ~ e 로 바로 전달해주어야하는데 그것이 Context
+
+Context를 응용한것이 Redux
+
+ */
 class Test extends PureComponent {
+
+    /*
+    생성자를 사용하는경우에는 정밀한 데이터 가공이 필요할경우 사용한다.
+     */
+    constructor(props) {
+        super(props);
+        // 세밀한 조정이 가능하다.
+        // filtering 도 가능함..
+        this.state = {
+            result: '',
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+
+    }
 
     inputRef = createRef();
 
