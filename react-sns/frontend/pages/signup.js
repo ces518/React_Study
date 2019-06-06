@@ -4,33 +4,47 @@ import Head from 'next/head';
 import {Button, Checkbox, Form, Input} from "antd";
 
 const Signup = () => {
-    const [id, setId] = useState('');
-    const [nick, setNick] = useState('');
-    const [password, setPassword] = useState('');
+    const useInput = (initValue = null) => {
+        const [value, setValue] = useState(initValue);
+        const handler = (e) => {
+            setValue(e.target.value);
+        };
+        return [value, handler];
+    };
+
+    const [id, onChangeId] = useInput('');
+    const [nick, onChangeNick] = useInput('');
+    const [password, onChangePassword] = useInput('');
     const [passwordCheck, setPasswordCheck] = useState('');
     const [term, setTerm] = useState(false);
+    const [passwordError, setPasswordError] = useInput(false);
+    const [termError, setTermError] = useInput(false);
 
-    const onSubmit = () => {
+    const onSubmit = (e) => {
+        e.preventDefault();
 
-    };
-
-    const onChangeId = (e) => {
-        setId(e.target.value);
-    };
-
-    const onChangeNick = (e) => {
-        setNick(e.target.value);
-    };
-
-    const onChangePassword = (e) => {
-        setPassword(e.target.value);
+        if (password !== passwordCheck) {
+            return setPasswordError(true);
+        }
+        if (!term) {
+            return setTermError(true);
+        }
+        console.log({
+            id,
+            nick,
+            password,
+            passwordCheck,
+            term,
+        });
     };
 
     const onChangePasswordCheck = (e) => {
+        setPasswordError(e.target.value !== password);
         setPasswordCheck(e.target.value);
     };
 
     const onChangeTerm = () => {
+        setTermError(false);
         setTerm((prevTerm) => !prevTerm);
     };
 
@@ -62,11 +76,13 @@ const Signup = () => {
                         <label htmlFor="user-password-check">패스워드 체크</label>
                         <br />
                         <Input name="user-password-check" type="password" value={passwordCheck} required onChange={onChangePasswordCheck}/>
+                        {passwordError && <div style={{ color: 'red' }}>패스워드가 일치하지 않습니다.</div>}
                     </div>
                     <div>
                         <Checkbox name="user-term" value={term} onChange={onChangeTerm}>동의합니다.</Checkbox>
+                        {termError && <div style={{ color: 'red' }}>약관에 동의하셔야합니다. </div> }
                     </div>
-                    <div>
+                    <div style={{ marginTop: 10 }}>
                         <Button type="primary" htmlType="submit">가입하기</Button>
                     </div>
                 </Form>
