@@ -140,3 +140,57 @@ export default Home;
 ```
 
 - React에서 style은 객체형태로 정의하는것을 권장한다.
+
+
+#### 프로필, 회원가입 페이지 만들기
+- page > profile.js, signup.js 생성
+- 각 페이지별 js 작성
+```javascript
+import React from 'react';
+import AppLayout from '../components/AppLayout';
+import Head from 'next/head';
+
+const Profile = () => {
+    return (
+        <>
+            <Head>
+                <title>React-SNS</title>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"/>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js"></script>
+            </Head>
+            <AppLayout>
+                <div>
+                    프로필
+                </div>
+            </AppLayout>
+        </>
+    )
+};
+
+export default Profile;
+
+import React from 'react';
+import AppLayout from '../components/AppLayout';
+import Head from 'next/head';
+
+const Signup = () => {
+    return (
+        <>
+            <Head>
+                <title>React-SNS</title>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"/>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js"></script>
+            </Head>
+            <AppLayout>
+                <div>
+                    회원가입
+                </div>
+            </AppLayout>
+        </>
+    )
+};
+
+export default Signup;
+```
+- 문제점
+    - Head의 CSS부분, AppLayout 부분이 게속해서 중복이 발생한다..
