@@ -569,3 +569,73 @@ _document.js:   html, head, body
         
 _error.js: 에러 페이지
 ```
+
+
+# antd 그리드 시스템
+- Boorstrap 과 같이 Row, Col 의 xs, md 등 화면 크기별 그리드 분할이 가능하다. 
+- 기본적으로 반응형 제공
+- Card 컴포넌트를 활용해 로그인 아바타 구현
+
+* frontend 개발시 backend에서 받을 데이터를 dummy 로 정의해두고 개발하는것이 좋다.
+* backend와 의 협업관계에서 서로 주고받을 데이터를 문서화 해둘것.
+
+```javascript
+import React from 'react';
+import Link from 'next/link';
+import PropTypes from 'prop-types';
+import {Menu, Input, Button, Row, Col, Card, Avatar} from "antd";
+
+// 서버로 부터 받을 더미 데이터를 사용
+const dummy = {
+    nickname: '박준영',
+    post: [],
+    following: [],
+    follower: [],
+};
+
+/*
+ children: props이다.
+ */
+const AppLayout = ({ children }) => {
+    return (
+        <div>
+            <Menu mode="horizontal">
+                <Menu.Item key="home"><Link href="/"><a>노드버드</a></Link></Menu.Item>
+                <Menu.Item key="profile"><Link href="/profile"><a>프로필</a></Link></Menu.Item>
+                <Menu.Item key="mail">
+                    <Input.Search enterButton style={{ verticalAlign: 'middle' }} />
+                </Menu.Item>
+            </Menu>
+            <Row>
+                <Col xs={24} md={6}>
+                    <Card
+                        actions={[
+                            <div key="twit">짹짹 <br/> {dummy.post.length}</div>,
+                            <div key="following">팔로잉 <br/> {dummy.following.length}</div>,
+                            <div key="follower">팔로워 <br/> {dummy.follower.length}</div>
+                        ]}
+                    >
+                        <Card.Meta
+                            avatar={<Avatar>{dummy.nickname[0]}</Avatar>}
+                            title={dummy.nickname}
+                        />
+                    <Link href="/signup"><a><Button>회원가입</Button></a></Link>
+                    </Card>
+                </Col>
+                <Col xs={24} md={12}>
+                    { children }
+                </Col>
+                <Col xs={24} md={6}>
+
+                </Col>
+            </Row>
+        </div>
+    )
+};
+
+AppLayout.proptypes = {
+  children: PropTypes.node,
+};
+
+export default AppLayout;
+```
