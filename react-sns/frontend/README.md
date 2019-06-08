@@ -527,3 +527,45 @@ const TextInput = memo(({value, onChange}) => {
   )  
 });
 ```
+
+# Prop-types
+- React는 자식컴포넌트가 부모로부터 받은 Props를 올바른 데이터 타입의 데이터를 받았는지 검증이 가능하다.
+- Prop-Types 설치
+    - npm i prop-types
+```javascript
+import React from 'react';
+import Head from "next/head";
+import PropTypes from 'prop-types';
+import AppLayout from "../components/AppLayout";
+
+const ReactBird = ({ Component }) => {
+  return (
+      <>
+          <Head>
+              <title>React-SNS</title>
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"/>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js"></script>
+          </Head>
+          <AppLayout>
+            <Component/>
+          </AppLayout>
+      </>
+  )
+};
+
+ReactBird.proptypes = {
+  Component: PropTypes.elementType, // JSX에 랜더링 할 수 있는 데이터 타입
+};
+
+export default ReactBird;
+```
+
+### next 파일 구성
+- document.js, _app.js, _error.js
+```javascript
+_document.js:   html, head, body
+    _app.js:    root
+        pages:  실제 컴포넌트들 
+        
+_error.js: 에러 페이지
+```
