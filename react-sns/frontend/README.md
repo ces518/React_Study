@@ -972,3 +972,84 @@ const reducer = (state = initialState, action) => {
 
 export default reducer;
 ```
+
+
+# React, Redux 연결하기
+- Provider = redux state를 제공해준다.
+- 최상위 루트가 Provider이기 떄문에 하위 컴포넌트들은 redux state를 받을 수 있게됨
+- next에 redux를 적용하려면 next-redux-wrapper를 설치해 주어야 한다.
+    - npm i next-redux-wrapper
+- ReactBird 컴포넌트의 store props를 넣어주는 역할을 next-redux-wrapper가 해준다.
+```javascript
+import React from 'react';
+import Head from "next/head";
+import PropTypes from 'prop-types';
+import AppLayout from "../components/AppLayout";
+import { Provider } from 'react-redux';
+import reducer from '../reducers';
+
+const ReactBird = ({ Component, store }) => {
+  return (
+      <Provider store={store}>
+          <Head>
+              <title>React-SNS</title>
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"/>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js"></script>
+          </Head>
+          <AppLayout>
+            <Component/>
+          </AppLayout>
+      </Provider>
+    )
+};
+
+ReactBird.proptypes = {
+  Component: PropTypes.elementType, // JSX에 랜더링 할 수 있는 데이터 타입
+};
+
+export default ReactBird;
+```
+
+- withRedux로 ReactBird를 감싸준다. props로 store를 넣어준다.
+- 하이오더펑션
+- state, reducer가 합쳐져있는것이 store
+
+```javascript
+import withRedux from 'next-redux-wrapper';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import reducer from '../reducers';
+
+
+export default withRedux((initialState, options) => {
+    const store = createStore(reducer, initialState);
+    return store;
+})(ReactBird);
+```
+- reducer 정의시 default 도 지정해주어야한다.
+- default가 실행될 이유는 없지만, 코드상 불변성을 유지해주기위해서 ...state 문법으로 새로운객체를 리턴해준다.
+```javascript
+const reducer = (state = initialState, action) => {
+    switch (action.type) {
+        case LOG_IN: {
+            return {
+                ...state,
+                isLoggedIn: true,
+                user: action.data,
+            }
+        }
+        case LOG_OUT: {
+            return {
+                ...state,
+                isLoggedIn: false,
+                user: null,
+            }
+        }
+        default: {
+            return {
+                ...state,
+            }
+        }
+    }
+};
+```
