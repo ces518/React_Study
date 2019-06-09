@@ -1,37 +1,10 @@
-const initialState = {
-    isLoggedIn: false,
-    user: {},
-};
+import { combineReducers } from "redux";
+import user from './user';
+import post from './post';
 
-const LOG_IN = 'LOG_IN'; // action의 이름
-const LOG_OUT = 'LOG_OUT';
+const rootReducer = combineReducers({
+    user,
+    post,
+});
 
-const loginAction = {
-  type: LOG_IN,
-  data: {
-      nickname: '박준영',
-  }
-};
-
-const logoutAction = {
-    type: LOG_OUT,
-}
-
-const reducer = (state = initialState, action) => {
-    switch (action.type) {
-        case LOG_IN: {
-            return {
-                ...state,
-                isLoggedIn: true,
-                user: action.data,
-            }
-        }
-        case LOG_OUT: {
-            return {
-                ...state,
-                isLoggedIn: false,
-                user: null,
-            }
-        }
-    }
-};
+export default rootReducer;

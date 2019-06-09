@@ -870,3 +870,105 @@ const reducer = (state = initialState, action) => {
     }
 };
 ```
+
+# 불변성 
+- 객체는 참조를 기준으로 판단하기때문에 ...state 와 같은 문법으로 새로운 객체를 생성해서 상태를 변경해주어야
+- redux도 상태의변경을 감지한다.
+- 각 리듀서들을 하나의 루트 리듀서로 묶어준다
+- reducers > index.js
+```javascript
+// index.js
+import { combineReducers } from "redux";
+import user from './user';
+import post from './post';
+
+const rootReducer = combineReducers({
+    user,
+    post,
+});
+
+export default rootReducer;
+
+
+// post.js
+export const initialState = {
+  mainPosts: [],
+};
+
+const ADD_POST = 'ADD_POST';
+const ADD_DUMMY = 'ADD_DUMMY';
+
+const addPost = {
+  type: ADD_POST,
+};
+const addDummy = {
+    type: ADD_DUMMY,
+    data: {
+        content: 'Hello',
+        userId: 1,
+        user: {
+            nickname: '준영',
+        },
+    },
+};
+
+const reducer = (state = initialState, action) => {
+    switch (action.type) {
+        case ADD_POST: {
+            return {
+                ...state,
+            }
+        }
+        case ADD_DUMMY: {
+            return {
+                ...state,
+                mainPosts: [action.data, ...state.mainPosts],
+            }
+        }
+    }
+};
+
+export default reducer;
+
+
+// user.js
+export const initialState = {
+    isLoggedIn: false,
+    user: {},
+};
+
+const LOG_IN = 'LOG_IN'; // action의 이름
+const LOG_OUT = 'LOG_OUT';
+
+const loginAction = {
+    type: LOG_IN,
+    data: {
+        nickname: '박준영',
+    }
+};
+
+const logoutAction = {
+    type: LOG_OUT,
+}
+
+const reducer = (state = initialState, action) => {
+    switch (action.type) {
+        case LOG_IN: {
+            return {
+                ...state,
+                isLoggedIn: true,
+                user: action.data,
+            }
+        }
+        case LOG_OUT: {
+            return {
+                ...state,
+                isLoggedIn: false,
+                user: null,
+            }
+        }
+    }
+};
+
+export default reducer;
+```
