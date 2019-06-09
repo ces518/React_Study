@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import {Menu, Input, Button, Row, Col, Card, Avatar,Form} from "antd";
 
 import LoginForm from '../components/LoginForm';
+import UserProfile from '../components/UserProfile';
 
 // 서버로 부터 받을 더미 데이터를 사용
 const dummy = {
@@ -31,18 +32,7 @@ const AppLayout = ({ children }) => {
             <Row gutter={8}>
                 <Col xs={24} md={6}>
                     {dummy.isLoggedIn
-                        ? <Card
-                            actions={[
-                                <div key="twit">짹짹 <br/> {dummy.post.length}</div>,
-                                <div key="following">팔로잉 <br/> {dummy.following.length}</div>,
-                                <div key="follower">팔로워 <br/> {dummy.follower.length}</div>
-                            ]}
-                        >
-                            <Card.Meta
-                                avatar={<Avatar>{dummy.nickname[0]}</Avatar>}
-                                title={dummy.nickname}
-                            />
-                        </Card>
+                        ? <UserProfile/>
                         :
                         <LoginForm />
                     }

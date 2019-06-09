@@ -785,3 +785,8 @@ const Profile = () => {
 
 export default Profile;
 ``` 
+
+
+# 컴포넌트 분리하기
+- Form은 state가있기때문에 분리하는것을 권장
+- 분리시 Protypes로 props 검증
