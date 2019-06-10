@@ -5,21 +5,12 @@ import {Menu, Input, Button, Row, Col, Card, Avatar,Form} from "antd";
 
 import LoginForm from '../components/LoginForm';
 import UserProfile from '../components/UserProfile';
-
-// 서버로 부터 받을 더미 데이터를 사용
-const dummy = {
-    isLoggedIn: false,
-    nickname: '박준영',
-    post: [],
-    following: [],
-    follower: [],
-};
-
+import { useSelector } from 'react-redux';
 /*
  children: props이다.
  */
 const AppLayout = ({ children }) => {
-
+    const { isLoggedIn } = useSelector(state => state.user);
     return (
         <div>
             <Menu mode="horizontal">
@@ -31,7 +22,7 @@ const AppLayout = ({ children }) => {
             </Menu>
             <Row gutter={8}>
                 <Col xs={24} md={6}>
-                    {dummy.isLoggedIn
+                    {isLoggedIn
                         ? <UserProfile/>
                         :
                         <LoginForm />

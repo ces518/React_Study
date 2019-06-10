@@ -1169,3 +1169,173 @@ function mapDispatchToProps (dispatch) {
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
 ```
+
+# Dummy 데이터로 Redux 사용하기
+- useSelector도 여러번 사용 가능하다.
+- 자주 사용하면서 잘게 잘라서 가져오는것이 좋음.
+- 성능최적화를 위해 매우 잘게 쪼개야하는 경우도 존재함.
+- dummy 데이터들을 Redux로 변경
+
+- AppLayout
+```javascript
+import React from 'react';
+import Link from 'next/link';
+import PropTypes from 'prop-types';
+import {Menu, Input, Button, Row, Col, Card, Avatar,Form} from "antd";
+
+import LoginForm from '../components/LoginForm';
+import UserProfile from '../components/UserProfile';
+import { useSelector } from 'react-redux';
+/*
+ children: props이다.
+ */
+const AppLayout = ({ children }) => {
+    const { isLoggedIn } = useSelector(state => state.user);
+    return (
+        <div>
+            <Menu mode="horizontal">
+                <Menu.Item key="home"><Link href="/"><a>노드버드</a></Link></Menu.Item>
+                <Menu.Item key="profile"><Link href="/profile"><a>프로필</a></Link></Menu.Item>
+                <Menu.Item key="mail">
+                    <Input.Search enterButton style={{ verticalAlign: 'middle' }} />
+                </Menu.Item>
+            </Menu>
+            <Row gutter={8}>
+                <Col xs={24} md={6}>
+                    {isLoggedIn
+                        ? <UserProfile/>
+                        :
+                        <LoginForm />
+                    }
+
+                </Col>
+                <Col xs={24} md={12}>
+                    { children }
+                </Col>
+                <Col xs={24} md={6}>
+
+                </Col>
+            </Row>
+        </div>
+    )
+};
+
+AppLayout.proptypes = {
+  children: PropTypes.node,
+};
+
+export default AppLayout;
+
+```
+
+- LoginForm
+    - 로그인 시도시 dummy유저 데이터로 로그인 (redux의 loginAction을 Dispatch)
+```javascript
+import React, { useCallback } from 'react';
+import Link from 'next/link';
+import { Form, Input, Button } from 'antd';
+import { useDispatch } from 'react-redux';
+import { loginAction } from '../reducers/user';
+import { useInput } from '../pages/signup';
+
+const LoginForm = () => {
+    const [id, onChangeId] = useInput('');
+    const [password, onChangePassword] = useInput('');
+    const dispatch = useDispatch();
+    const onSubmit = useCallback((e) => {
+        e.preventDefault();
+        dispatch(loginAction);
+    }, [id, password]);
+
+    return (
+        <Form onSubmit={onSubmit} style={{ padding: '10px' }}>
+            <div>
+                <label htmlFor="user-id">아이디</label>
+                <br/>
+                <Input name="user-id" value={id} onChange={onChangeId} required />
+            </div>
+            <div>
+                <label htmlFor="user-password">패스워드</label>
+                <br/>
+                <Input name="user-password" value={password} onChange={onChangePassword} type="password" required />
+            </div>
+            <div style={{ marginTop: '10px' }}>
+                <Button type="primary" htmlType="submit" loading={false}>로그인</Button>
+                <Link href="/signup"><a><Button>회원가입</Button></a></Link>
+            </div>
+        </Form>
+    )
+};
+
+export default LoginForm;
+```
+
+- PostForm
+```javascript
+import React from 'react';
+import { Form, Input, Button } from 'antd';
+import { useSelector } from 'react-redux';
+
+const PostForm = () => {
+    const { imagePaths } = useSelector(state => state.post);
+    return (
+      <Form style={{ margin: '10px 0 20px' }} encType="multipart/form-data">
+          <Input.TextArea maxLength={140} placeholder="어떤 신기한 일이 있었나요?" />
+          <div>
+              <input type="file" multiple hidden />
+              <Button>이미지 업로드</Button>
+              <Button type="primary" style={{ float: 'right' }} htmlType="submit" >짹짹</Button>
+          </div>
+          <div>
+              {imagePaths.map((v, i) => {
+                  return (
+                      <div key={v} style={{ display: 'inline-block' }}>
+                          <img src={'http://localhost:3065/' + v} style={{ width: '200px' }} alt={v}/>
+                          <div>
+                              <Button>제거</Button>
+                          </div>
+                      </div>
+                  )
+              })}
+          </div>
+      </Form>
+    )
+};
+
+export default PostForm;
+```
+
+- UserProfile
+    - 로그인시 Dummy 유저로 로그인, 로그아웃시 유저가 null
+```javascript
+import React, { useCallback } from 'react';
+import { Card, Avatar, Button } from 'antd';
+import { useSelector, useDispatch } from "react-redux";
+import { logoutAction } from '../reducers/user';
+
+const UserProfile = () => {
+    const { user } = useSelector(state => state.user);
+    const dispatch = useDispatch();
+
+    const onLogout = useCallback(() => {
+        dispatch(logoutAction);
+    }, []);
+    return (
+        <Card
+            actions={[
+                <div key="twit">짹짹 <br/> {user.post.length}</div>,
+                <div key="following">팔로잉 <br/> {user.following.length}</div>,
+                <div key="follower">팔로워 <br/> {user.follower.length}</div>
+            ]}
+        >
+            <Card.Meta
+                avatar={<Avatar>{user.nickname[0]}</Avatar>}
+                title={user.nickname}
+            />
+            <Button onClick={onLogout}>로그아웃</Button>
+        </Card>
+    )
+};
+
+export default UserProfile;
+```
