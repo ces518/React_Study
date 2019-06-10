@@ -3,7 +3,7 @@ import Head from "next/head";
 import PropTypes from 'prop-types';
 import withRedux from 'next-redux-wrapper';
 import AppLayout from "../components/AppLayout";
-import { createStore } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import reducer from '../reducers';
 
@@ -28,6 +28,11 @@ ReactBird.proptypes = {
 };
 
 export default withRedux((initialState, options) => {
-    const store = createStore(reducer, initialState);
+    const middlewares = [];
+    const enhancer = compose(applyMiddleware(...middlewares),
+        !options.isServer && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
+        ); // 미들웨어들을 합성해서 store에 넣어준다
+    const store = createStore(reducer, initialState, enhancer);
+
     return store;
 })(ReactBird);

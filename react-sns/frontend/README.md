@@ -1053,3 +1053,27 @@ const reducer = (state = initialState, action) => {
     }
 };
 ```
+
+# Redux DevTools 
+- DevTools 를 사용하려면 코드로 연결해주어야한다.
+- 미들웨어 : 리덕스 사가도 미들웨어이다
+    - 스토어에서 액션, 스테이트, 리듀서 과정에 껴서 변조 및 추가로직을 수행한다.
+    - Redux에 없는 기능을 추가하고싶을때 사용
+- 미들웨어를 합성해서 store에 함께 넣어줌.
+```javascript
+import { createStore, compose, applyMiddleware } from 'redux';
+
+export default withRedux((initialState, options) => {
+    const middlewares = [];
+    const enhancer = compose(applyMiddleware(...middlewares),
+        typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
+        ); // 미들웨어들을 합성해서 store에 넣어준다
+    const store = createStore(reducer, initialState, enhancer);
+
+    return store;
+})(ReactBird);
+```
+
+- typeof 대신 options 에 server인지 판단이 가능하다.
+- !options.isServer => typeof window 를 대체할수있다. 
+- next에서 제공하는 속성. 
