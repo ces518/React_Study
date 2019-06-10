@@ -1147,3 +1147,25 @@ const Home = () => {
 
 export default Home;
 ```
+
+# React-Redux Connect
+- 기존에 훅이 없었을땐 하이오더 컴포넌트로 만들어서 사용했다.
+- connect라는 컴포넌트를 활용해서 redux state의 user 를 react의 props의 user로 연결해준다.
+- dispatch같은 경우도 connect로 연결해주고 props로 받아온뒤 사용했었음.
+- 최대한 하이오더 컴포넌트를 피하고 훅스 활용 
+```javascript
+function mapStateToProps (state) {
+    return {
+        user: state.user,
+    }
+};
+
+function mapDispatchToProps (dispatch) {
+    return {
+        login: () => dispatch(loginAction),
+        logout: () => dispatch(logoutAction),
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
+```

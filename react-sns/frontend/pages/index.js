@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, connect } from 'react-redux';
 import { LOG_IN, LOG_OUT, loginAction, logoutAction } from '../reducers/user';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
@@ -48,4 +48,17 @@ const Home = () => {
   )
 };
 
-export default Home;
+function mapStateToProps (state) {
+    return {
+        user: state.user,
+    }
+};
+
+function mapDispatchToProps (dispatch) {
+    return {
+        login: () => dispatch(loginAction),
+        logout: () => dispatch(logoutAction),
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
