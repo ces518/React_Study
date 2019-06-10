@@ -1339,3 +1339,113 @@ const UserProfile = () => {
 
 export default UserProfile;
 ```
+
+# 리액트 state와 redux state
+- 리액트 state와 redux state를 같이 사용한다.
+- 모든 react state를 redux state로 만들경우, 모든 액션을 다 정의 해주어야하기때문에 코드량이 장황해진다.
+    - Action, Reducer 모두 구현해야함..
+    - 예외 발생시 디버깅도 힘들어진다. (모든 것을 action으로 처리되기때문에 추적이 힘들어짐)
+- 임시데이터 같은 경우에는 리액트 state를 사용 하는것이 좋다 (상황별로 다름)
+ 
+- 회원가입 redux 적용
+```javascript
+import React, {useCallback, useState} from 'react';
+import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
+import { signupAction } from '../reducers/user';
+import {Button, Checkbox, Form, Input} from "antd";
+
+
+const TextInput = ({ value }) => {
+    return (
+        <div>{value}</div>
+    )
+};
+
+TextInput.proptypes = {
+    value: PropTypes.string,
+};
+
+export const useInput = (initValue = null) => {
+    const [value, setValue] = useState(initValue);
+    const handler = useCallback((e) => {
+        setValue(e.target.value);
+    }, []);
+    return [value, handler];
+};
+
+const Signup = () => {
+
+    const [id, onChangeId] = useInput('');
+    const [nick, onChangeNick] = useInput('');
+    const [password, onChangePassword] = useInput('');
+    const [passwordCheck, setPasswordCheck] = useState('');
+    const [term, setTerm] = useState(false);
+    const [passwordError, setPasswordError] = useState(false);
+    const [termError, setTermError] = useState(false);
+    const dispatch = useDispatch();
+
+    const onSubmit = useCallback((e) => {
+        e.preventDefault();
+
+        if (password !== passwordCheck) {
+            return setPasswordError(true);
+        }
+        if (!term) {
+            return setTermError(true);
+        }
+        dispatch(signupAction({
+            id,
+            password,
+            nick
+        }));
+    }, [password, passwordCheck, term]);
+
+    const onChangePasswordCheck = useCallback((e) => {
+        setPasswordError(e.target.value !== password);
+        setPasswordCheck(e.target.value);
+    }, [passwordCheck]);
+
+    const onChangeTerm = useCallback(() => {
+        setTermError(false);
+        setTerm((prevTerm) => !prevTerm);
+    }, [term]);
+
+    return (
+        <>
+            <Form onSubmit={onSubmit} style={{ padding: 10 }}>
+                <div>
+                    <label htmlFor="user-id">아이디</label>
+                    <br />
+                    <Input name="user-id" value={id} required onChange={onChangeId}/>
+                </div>
+                <div>
+                    <label htmlFor="user-nick">닉네임</label>
+                    <br />
+                    <Input name="user-nick" value={nick} required onChange={onChangeNick}/>
+                </div>
+                <div>
+                    <label htmlFor="user-password">패스워드</label>
+                    <br />
+                    <Input name="user-password" type="password" value={password} required onChange={onChangePassword}/>
+                </div>
+                <div>
+                    <label htmlFor="user-password-check">패스워드 체크</label>
+                    <br />
+                    <Input name="user-password-check" type="password" value={passwordCheck} required onChange={onChangePasswordCheck}/>
+                    {passwordError && <div style={{ color: 'red' }}>패스워드가 일치하지 않습니다.</div>}
+                </div>
+                <div>
+                    <Checkbox name="user-term" value={term} onChange={onChangeTerm}>동의합니다.</Checkbox>
+                    {termError && <div style={{ color: 'red' }}>약관에 동의하셔야합니다. </div> }
+                </div>
+                <div style={{ marginTop: 10 }}>
+                    <Button type="primary" htmlType="submit">가입하기</Button>
+                </div>
+            </Form>
+        </>
+    )
+};
+
+export default Signup;
+```
