@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { LOG_IN, LOG_OUT, loginAction, logoutAction } from '../reducers/user';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
 
@@ -16,8 +18,26 @@ const dummy = {
 };
 
 const Home = () => {
+    const dispatch = useDispatch();
+    // 전체 state에서 user 를 가져온다.
+    // state는 전체를 의미한다.
+    const { isLoggedIn ,user } = useSelector(state => state.user);
+    useEffect(() => {
+        // ACTION 타입을 사용하는 방법
+        dispatch({
+            type: LOG_IN,
+            data: {
+                nickname: '박준영',
+            }
+        });
+        // ACTION을 직접 사용하는 방법
+        dispatch(logoutAction);
+        dispatch(loginAction);
+    }, []);
+
   return (
       <>
+          {user ? <div>로그인했습니다: {user.nickname}</div> : <div>로그아웃했습니다.</div>}
           {dummy.isLoggedIn && <PostForm dummy={dummy} />}
           {dummy.mainPosts.map((c) => {
               return (

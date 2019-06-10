@@ -19,12 +19,12 @@ const LoginForm = () => {
             <div>
                 <label htmlFor="user-id">아이디</label>
                 <br/>
-                <Input name="user-id" value={id} onChange={onChangeId} requried/>
+                <Input name="user-id" value={id} onChange={onChangeId} required />
             </div>
             <div>
                 <label htmlFor="user-password">패스워드</label>
                 <br/>
-                <Input name="user-password" value={password} onChange={onChangePassword} type="password" requried/>
+                <Input name="user-password" value={password} onChange={onChangePassword} type="password" required />
             </div>
             <div style={{ marginTop: '10px' }}>
                 <Button type="primary" htmlType="submit" loading={false}>로그인</Button>
