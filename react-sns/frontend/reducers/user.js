@@ -5,8 +5,11 @@ export const initialState = {
 };
 
 export const LOG_IN = 'LOG_IN'; // action의 이름
+export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
+export const LOG_IN_FAILURE = 'LOG_IN_FAILURE';
 export const LOG_OUT = 'LOG_OUT';
 export const SIGN_UP = 'SIGN_UP';
+export const SIGN_UP_SUCCESS = 'SIGN_SUCCESS';
 
 const dummyUser = {
     nickname: '박준영',
@@ -31,6 +34,10 @@ export const signupAction = (data) => {
         type: SIGN_UP,
         data: data,
     }
+};
+
+export const signupSuccess = {
+    type: SIGN_UP_SUCCESS,
 };
 
 const reducer = (state = initialState, action) => {

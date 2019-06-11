@@ -23,6 +23,13 @@ const Home = () => {
     )
 };
 
+// Generator문법
+// 무한의 개념, 비동기 처리시 사용한다.
+
+function* generator () {
+
+}
+
 function mapStateToProps (state) {
     return {
         user: state.user,

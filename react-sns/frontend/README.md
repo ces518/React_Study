@@ -1449,3 +1449,103 @@ const Signup = () => {
 
 export default Signup;
 ```
+
+# Redux Saga
+- 회원가입과 로그인의 경우 서버쪽과 통신이 필요하다.
+- Redux의 문제는 모든게 '동기'로 일어난다.
+- 로그인 프로세스
+    - 서버쪽 data 전달 
+    - 서버쪽 응답 확인
+    - 응답에 따라 로그인 성공, 실패 여부
+```javascript
+{type: LOG_IN, data:{id: 'ces518', password: '12341234'}}
+```
+- Redux를 확장할 경우 Middleware를 사용한다.
+- Middleware를 사용하여 redux Action 사이사이에 비동기 요청을 처리할수있도록한다.
+- redux-saga, redux-func, redux-observerable 이 중요하다.
+- 실무에서는 redux-saga를 많이쓴다.
+
+
+- Redux-saga 설치
+    - npm i redux-saga
+
+- Saga도 redux처럼 다수개로 분리하여 rootSaga로 하나로 묶어준다.
+
+- ROOT_SAGA
+```javascript
+import { all, call} from 'redux-saga/effects';
+import user from './user';
+import post from './post';
+
+export default function* rootSage () {
+    yield all([
+        call(user),
+        call(post),
+    ]);
+};
+
+```
+
+
+- USER_SAGA
+```javascript
+import { all, fork, takeLatest, call, put } from 'redux-saga/effects';
+import {LOG_IN, LOG_IN_SUCCESS} from "../reducers/user";
+
+
+function loginAPI () {
+    // 서버에 요청을 보내는 부분
+}
+
+function* login () {
+    try {
+        yield call(loginAPI); // 로그인 성공시
+        yield put({ // put 은 dispatch와 동일
+            type: LOG_IN_SUCCESSCESS,
+        })
+    } catch (e){ // 로그인 실패시
+        console.error(e);
+        yield put({
+            type: LOG_IN_FAILURE,
+        });
+    }
+}
+
+function* watchLogin () {
+    yield takeLatest(LOG_IN, login);
+}
+
+export default function* userSaga() {
+    yield all([
+        fork(watchLogin),
+    ]);
+};
+
+```
+
+- POST_SAGA
+```javascript
+import { all } from 'redux-saga/effects';
+
+export default function* postSaga() {
+    yield all([]);
+};
+```
+
+- Call 은 함수의 동기적 호출
+- Fork 는 함수의 비동기적 호출
+- Put은 액션 Dispatch
+
+- 로그인 동작
+    - 서버에 요청 > Request (LOG_IN)
+    - (이 부분이 비동기) SAGA 가 처리하는부분 (이어줌역할)
+    - 1. 성공 (LOG_IN_SUCCESS)
+    - 2. 실패 (LOG_IN_FAILURE)
+    
+- REDUX
+    - LOG_IN: 바로실행
+    
+- REDUX_SAGA
+    - LOG_IN 액션을 실행되는지 감시
+    - 실행시 캐치하여 SAGA에서 비동기 동작을 실행
+    - 결과에 따라 SUCCESS, FAILURE실행
