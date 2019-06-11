@@ -6,6 +6,8 @@ import AppLayout from "../components/AppLayout";
 import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import reducer from '../reducers';
+import sagaMiddleware from "../reducers/middleware";
+import rootSaga from '../sagas/index';
 
 const ReactBird = ({ Component, store }) => {
   return (
@@ -28,11 +30,16 @@ ReactBird.proptypes = {
 };
 
 export default withRedux((initialState, options) => {
-    const middlewares = [];
-    const enhancer = compose(applyMiddleware(...middlewares),
-        !options.isServer && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
-        ); // 미들웨어들을 합성해서 store에 넣어준다
+    const middlewares = [sagaMiddleware]; // redux - saga middleware 연결
+    const enhancer = process.env.NODE_ENV === 'production' ?
+        compose(applyMiddleware(...middlewares))
+        :
+        compose(applyMiddleware(...middlewares),
+            !options.isServer && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
+        );
     const store = createStore(reducer, initialState, enhancer);
+
+    sagaMiddleware.run(rootSaga); // rootSaga를 run 해주어야함.
 
     return store;
 })(ReactBird);

@@ -1549,3 +1549,52 @@ export default function* postSaga() {
     - LOG_IN 액션을 실행되는지 감시
     - 실행시 캐치하여 SAGA에서 비동기 동작을 실행
     - 결과에 따라 SUCCESS, FAILURE실행
+
+
+# Redux-SAGA Middleware 연결하기
+- middleware.js 작성
+- redux-saga에서 제공하는 함수를 활용하여 연결
+
+```javascript
+import createSagaMiddleware from 'redux-saga';
+
+const sagaMiddleware = createSagaMiddleware();
+
+export default sagaMiddleware;
+
+```
+
+- _app.js 에서 middleware에 추가해준뒤 run 해주어야함.
+- rootSaga를 sagaMiddleware에 연결해준다.
+- 배포시에는 REDUX_DEVTOOLS를 제거한다.
+```javascript
+export default withRedux((initialState, options) => {
+    const middlewares = [sagaMiddleware]; // redux - saga middleware 연결
+    const enhancer = process.env.NODE_ENV === 'production' ?
+        compose(applyMiddleware(...middlewares))
+        :
+        compose(applyMiddleware(...middlewares),
+            !options.isServer && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
+        );
+    const store = createStore(reducer, initialState, enhancer);
+
+    sagaMiddleware.run(rootSaga); // rootSaga를 run 해주어야함.
+
+    return store;
+})(ReactBird);
+```
+
+- middleware , HOC 작성시 currying 기법을 활용한다.
+```javascript
+// currying
+const middleware = (store) => (next) => (action) => {
+    // 다른 작업
+  next(action);
+};
+
+hoc(plus)(Component);
+
+const hoc = (plus) => (Component) => () => {
+    
+}
+```
