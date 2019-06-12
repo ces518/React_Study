@@ -11,6 +11,23 @@ const Home = () => {
     const { isLoggedIn ,user } = useSelector(state => state.user);
     const { mainPosts } = useSelector(state => state.post);
 
+    useEffect(() => {
+        dispatch({
+            type: 'HELLO_SAGA',
+        });
+
+        dispatch({
+            type: 'HELLO_SAGA',
+        });
+
+        dispatch({
+            type: 'HELLO_SAGA',
+        });
+        // dispatch 3번시 after saga 가 3번찍힌 것을 기대
+        // 하지만 1번만 실행되고 함수가 종료됨.
+        // while true 로 변경시 기대값인 3번이 출력됨.
+    }, []);
+
     return (
       <>
           {isLoggedIn && <PostForm />}

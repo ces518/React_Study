@@ -1676,3 +1676,54 @@ function* generator() {
 const gen = generator();
 gen.next();
 ```
+
+# Redux-SAGA의 Generator
+- Redux-Devtools로 Action을 dispatch하면 saga에 걸리지않음.
+
+- HELLO_SAGA 액션을 Dispatch했을때 기대값은 aftersaga가 3번찍히는것이다.
+- 하지만 generator의 특성상 next를 아무리 호출한다고한들 함수가종료되고나면 더이상 실행되지않는다.
+- 액션에 대한 리스닝 -> 디스패치를 지속적으로 하기위해 Generator의 while(true)를 활용한다.
+```javascript
+    useEffect(() => {
+        dispatch({
+            type: 'HELLO_SAGA',
+        });
+
+        dispatch({
+            type: 'HELLO_SAGA',
+        });
+
+        dispatch({
+            type: 'HELLO_SAGA',
+        });
+        // dispatch 3번시 after saga 가 3번찍힌 것을 기대
+        // 하지만 1번만 실행되고 함수가 종료됨.
+        // while true 로 변경시 기대값인 3번이 출력됨.
+    }, []);
+
+
+
+function* helloSaga () {
+    console.log('before saga');
+    yield take(HELLO_SAGA); // take내부에 아무액션을 넣어줄수있다.
+    // HELLO_SAGA 라는 액션이 들어왔을때 yield가 재개된다.
+    // take내부에 next()가 존재하기때문에 재개됨.
+
+    console.log('after saga');
+    // 비동기요청, 타이머작업 등..
+}
+
+// while(true) 적용
+function* helloSaga () {
+    console.log('before saga');
+    while (true) { // while true 문에 넣음으로써 무한으로 action에 대해 처리가가능
+        yield take(HELLO_SAGA); // take내부에 아무액션을 넣어줄수있다.
+        // HELLO_SAGA 라는 액션이 들어왔을때 yield가 재개된다.
+        // take내부에 next()가 존재하기때문에 재개됨.
+
+        console.log('after saga');
+        // 비동기요청, 타이머작업 등..
+    }
+
+}
+```

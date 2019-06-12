@@ -6,7 +6,7 @@ import AppLayout from "../components/AppLayout";
 import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import reducer from '../reducers';
-import sagaMiddleware from "../reducers/middleware";
+import sagaMiddleware from "../sagas/middleware";
 import rootSaga from '../sagas/index';
 
 const ReactBird = ({ Component, store }) => {
