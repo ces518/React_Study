@@ -1584,7 +1584,9 @@ export default withRedux((initialState, options) => {
 })(ReactBird);
 ```
 
-- middleware , HOC 작성시 currying 기법을 활용한다.
+- middleware , HOC 작성시 currying 기법(인자 1개를 받은 함수를 게속해서 리턴)을 활용한다.
+- middleware는 보통 3단 커링 구조이다.
+- HOC는 기본 컴포넌트를 강화함
 ```javascript
 // currying
 const middleware = (store) => (next) => (action) => {
@@ -1597,4 +1599,80 @@ hoc(plus)(Component);
 const hoc = (plus) => (Component) => () => {
     
 }
+```
+
+# ES2015 제너레이터
+- 제네레이터란 ?
+    - 함수 실행 도중에 멈췄다가 사용자가 원할때 다시 재개할수 있는 함수이다.
+
+- 제너레이터 함수를 실행하면 일반함수와 달리 1,2,3이 찍히지않음.
+```javascript
+function* generator() {
+    console.log(1);
+    console.log(2);
+    console.log(3);
+}
+
+generator();
+```
+
+- next();를 호출해야 함수가실행된다. (closed 되기이전)
+- next();를 활용하여 함수를 재개할수 있다.
+```javascript
+function* generator() {
+    console.log(1);
+    console.log(2);
+    console.log(3);
+}
+
+const gen = generator();
+gen.next();
+```
+
+- next() 실행시 yield 에서 멈췄다가 다시 next()로 함수 재개시 3이 찍힌다.
+- 함수의 실행이 끝까지 종료되었다면 done이 true가 된다.
+- yield 에 지정해준값은 value로 리턴된다.
+- yield가 중단점의 역할을 한다.
+```javascript
+function* generator() {
+    console.log(1);
+    console.log(2);
+    yield 5;
+    console.log(3);
+}
+
+const gen = generator();
+gen.next();
+get.next();
+```
+
+- yield* 로 존재한다.
+- yield* 뒤의 값을 자동적으로 iterable 시킨다.
+- yield* 12345 
+```javascript
+function* generator() {
+    yield 1
+    yield 2
+    yield 3
+    yield* [1,2,3] // 위의 3줄을 줄인것과 동일하다.
+}
+```
+
+- async await 는 2017년에 표준이 되었다.
+- 그 전까지는 비동기 제어하는데 문제가 있었음.
+- generator를 활용하여 비동기함수를 동기처럼 사용하게 만들 수 있다.
+- generator의 최대 장점은 함수를 원하는 시기에 중간 실행 가능하다.
+
+- generator의 특성때문에 무한반복문이 무한반복문이 아니게된다.
+- 마음대로 컨트롤이 가능함.
+```javascript
+function* generator() {
+    let i = 0;
+    while (true) {
+        yield i++;
+    }
+}
+
+const gen = generator();
+gen.next();
 ```
