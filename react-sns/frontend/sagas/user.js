@@ -1,4 +1,4 @@
-import { all, fork, takeLatest, call, put, take } from 'redux-saga/effects';
+import { all, fork, takeLatest, call, put, take, delay } from 'redux-saga/effects';
 import { LOG_IN, LOG_IN_FAILURE, LOG_IN_SUCCESS } from "../reducers/user";
 
 
@@ -22,11 +22,19 @@ function* login () {
     }
 }
 
+// LOG_IN 을 받으면 LOG_IN_SUCCESS를 자동적으로 실행한다
+// 반복문 내에 존재하지 않기때문에 1회만 받게됨.
 function* watchLogin () {
-    yield takeLatest(LOG_IN, login);
+    while (true) {
+        yield take(LOG_IN);
+        yield delay(2000);
+        yield put({ // redux의 dispatch와 동일
+            type: LOG_IN_SUCCESS,
+        });
+    }
 }
 
-function* helloSaga () {
+function* watchHello () {
     console.log('before saga');
     while (true) { // while true 문에 넣음으로써 무한으로 action에 대해 처리가가능
         yield take(HELLO_SAGA); // take내부에 아무액션을 넣어줄수있다.
@@ -39,9 +47,20 @@ function* helloSaga () {
 
 }
 
+function* watchSignup() {
+
+}
+
 export default function* userSaga() {
+    // yield all([
+    //     fork(watchLogin),
+    //     fork(helloSaga),
+    // ]);
+
+    // 여러개 등록할때 all을 사용함.
     yield all([
-        fork(watchLogin),
-        fork(helloSaga),
+        watchLogin(),
+        // watchHello(),
+        watchSignup(),
     ]);
 };

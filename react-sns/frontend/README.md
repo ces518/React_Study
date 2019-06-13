@@ -1727,3 +1727,9 @@ function* helloSaga () {
 
 }
 ```
+
+# Redux-saga 반복문
+- 보통 이벤트 리스너등록시 callback 형식이다.
+- generator를 활용하여 callback hell 문제를 해결했다.
+- 특정 버튼을 5회만 클릭되게 하고싶을때 addEventListener 에서 5회카운트후 removeEventListener 해주어야하지만
+- saga는 generator기반 이기때문에 반복문을 활용하여 제어가 가능하다.
