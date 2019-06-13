@@ -1,4 +1,4 @@
-import { all, fork, takeLatest, call, put, take, delay } from 'redux-saga/effects';
+import { all, fork, takeLatest, takeEvery, call, put, take, delay } from 'redux-saga/effects';
 import { LOG_IN, LOG_IN_FAILURE, LOG_IN_SUCCESS } from "../reducers/user";
 
 
@@ -45,6 +45,17 @@ function* watchHello () {
         // 비동기요청, 타이머작업 등..
     }
 
+}
+
+// takeEvery 가 while(true)를 대체한다.
+// ACTION 과 generator함수를 정의
+function* watchHelloTakeEvery () {
+    yield takeLatest(HELLO_SAGA, function* () {
+        yield delay(1000);
+        yield put({
+            type: 'BYE_SAGA'
+        });
+    });
 }
 
 function* watchSignup() {

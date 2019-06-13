@@ -1733,3 +1733,38 @@ function* helloSaga () {
 - generator를 활용하여 callback hell 문제를 해결했다.
 - 특정 버튼을 5회만 클릭되게 하고싶을때 addEventListener 에서 5회카운트후 removeEventListener 해주어야하지만
 - saga는 generator기반 이기때문에 반복문을 활용하여 제어가 가능하다.
+
+
+# takeLatest, takeEvery
+- while(true) 의 경우가 대부분이기 떄문에
+- while(true) 를 숨기기 위해 제공함.
+- takeEvery는 while(true)를 대체한다.
+
+```javascript
+// takeEvery 가 while(true)를 대체한다.
+// ACTION 과 generator함수를 정의
+function* watchHelloTakeEvery () {
+    yield takeEvery(HELLO_SAGA, function* () {
+        yield put({
+            type: 'BYE_SAGA'
+        });
+    });
+}
+```
+
+- takeLastest는 액션이 여러번 실행됬을때 가장 마지막 하나만 유효하게된다
+- 이전 요청이 종료되지않았다면 이전 요청을 취소한다.
+```javascript
+// takeEvery 가 while(true)를 대체한다.
+// ACTION 과 generator함수를 정의
+function* watchHelloTakeEvery () {
+    yield takeLatest(HELLO_SAGA, function* () {
+        yield delay(1000);
+        yield put({
+            type: 'BYE_SAGA'
+        });
+    });
+}
+```
+
+- 매 요청이 유효할경우 takeEvery, 마지막 요청만 유효할경우 takeLatest를 사용하자.
