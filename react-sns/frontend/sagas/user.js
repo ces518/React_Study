@@ -1,5 +1,5 @@
 import { all, fork, takeLatest, takeEvery, call, put, take, delay } from 'redux-saga/effects';
-import { LOG_IN, LOG_IN_FAILURE, LOG_IN_SUCCESS } from "../reducers/user";
+import { LOG_IN_REQUEST, LOG_IN_FAILURE, LOG_IN_SUCCESS } from "../reducers/user";
 
 
 const HELLO_SAGA = 'HELLO_SAGA';
@@ -32,7 +32,7 @@ function* login () {
 // 반복문 내에 존재하지 않기때문에 1회만 받게됨.
 function* watchLogin () {
     while (true) {
-        yield take(LOG_IN);
+        yield take(LOG_IN_REQUEST);
         yield delay(2000);
         yield put({ // redux의 dispatch와 동일
             type: LOG_IN_SUCCESS,

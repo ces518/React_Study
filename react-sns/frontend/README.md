@@ -1813,3 +1813,43 @@ function* login () {
 
 - javascript는 에러가나면 서버가 죽을 가능성도 존재하기때문에 
 - 에러가 날 여지가 있는 구문으 try catch 로 에러를 핸들렁 해주어야한다.
+
+- 비동기 요청을 saga가 전담하여 컴포넌트에서 비동기 액션들을 분리하는것.
+
+
+# ESLINT - AIRBNB
+- javascript airbnb 스탠다드
+    - npm i -D eslint-config-airbnb
+- 웹접근성 
+    - npm i -D eslint-plugin-jsx-a11y
+- 바벨 최신문법 적용
+    - npm i -D babel-eslint
+   
+- .eslintrc 파일 수정 
+```
+{
+  "parser": "babel-eslint", // 바벨 최신문법적용
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module", // import, export, require
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true, // 바벨 최신문법적용
+  },
+  "extends": [
+    "airbnb" // airbnb룰 적용
+  ],
+  "plugins": [
+    "import",
+    "react-hooks"
+  ],
+  "rules": { // 너무 엄격한룰 무시
+    "no-underscore-dangle": "off"
+  }
+}
+```

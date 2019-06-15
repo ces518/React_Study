@@ -33,15 +33,13 @@ export const loginAction = {
 };
 
 export const logoutAction = {
-    type: LOG_OUT,
+    type: LOG_OUT_REQUEST,
 }
 
-export const signupAction = (data) => {
-    return {
-        type: SIGN_UP,
-        data: data,
-    }
-};
+export const signupAction = (data) => ({ // 바로 리턴하는함수는 소괄호로 사용
+    type: SIGN_UP_REQUEST,
+    data: data
+});
 
 export const signupSuccess = {
     type: SIGN_UP_SUCCESS,
