@@ -1853,3 +1853,54 @@ function* login () {
   }
 }
 ```
+
+# redux state, action 구조 잡기
+- saga에 한가지 패턴을 정함
+
+- 다음과같이 비동기처리를 해야할경우 3가지 함수를 하나의 쌍으로 지정하여 개발
+- watchSignUp // signUp 액션 감지
+- signUp // 액션에 대한 이벤트 리스너
+- signUpApi // 서버와 요청하는 부
+```javascript
+function signUpApi() {
+
+}
+
+function* signUp () {
+    try {
+        yield call(signUpApi);
+        yield put({
+            type: SIGN_UP_SUCCESS,
+        })
+    } catch (e){ 
+        console.error(e);
+        yield put({
+            type: SIGN_UP_SUCCESS,
+        });
+    }
+}
+
+
+
+function* watchSignUp() {
+    yield takeEvery(SIGN_UP_REQUEST, signUp);
+}
+```
+
+* 변수명을 최대한 의미있고 알아보고 쉽게 지정할것 주석이 필요없을 정도로...
+
+```javascript
+export const initialState = {
+    isLoggedIn: false, // 로그인여부
+    isLoggingOut: false, // 로그아웃 시도중
+    isLoggingIn: false, // 로그인 시도중
+    loginErrorReason: '', // 로그인실패 이유
+    signedUp: false, // 회원가입 성공 여부
+    isSigningUp: false, // 회원가입 시도중
+    signUpErrorReason: '', //회원가입실패사유
+    me: null,
+    followingList: [], // 팔로잉 목록
+    followerList: [], // 팔로워목록
+    userInfo: null, // 다른사람의 정보
+};
+```

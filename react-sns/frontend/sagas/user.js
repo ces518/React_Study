@@ -1,11 +1,19 @@
 import { all, fork, takeLatest, takeEvery, call, put, take, delay } from 'redux-saga/effects';
-import { LOG_IN_REQUEST, LOG_IN_FAILURE, LOG_IN_SUCCESS } from "../reducers/user";
-
+import {
+    LOG_IN_REQUEST,
+    LOG_IN_FAILURE,
+    LOG_IN_SUCCESS,
+    SIGN_UP_REQUEST,
+    SIGN_UP_SUCCESS,
+    SIGN_UP_FAILURE
+} from "../reducers/user";
+import axios from 'axios';
 
 const HELLO_SAGA = 'HELLO_SAGA';
 
 function loginAPI () {
     // 서버에 요청을 보내는 부분
+    return axios.post('/login');
 }
 
 function logger () {
@@ -64,8 +72,28 @@ function* watchHelloTakeEvery () {
     });
 }
 
-function* watchSignup() {
+function signUpApi() {
 
+}
+
+function* signUp () {
+    try {
+        yield call(signUpApi);
+        yield put({
+            type: SIGN_UP_SUCCESS,
+        })
+    } catch (e){
+        console.error(e);
+        yield put({
+            type: SIGN_UP_FAILURE,
+        });
+    }
+}
+
+
+
+function* watchSignUp() {
+    yield takeEvery(SIGN_UP_REQUEST, signUp);
 }
 
 export default function* userSaga() {
@@ -79,7 +107,6 @@ export default function* userSaga() {
     // 이 이벤트리스너는 순서가 있지않기때문에 fork를 사용한다.
     yield all([
         fork(watchLogin),
-        // watchHello(),
-        fork(watchSignup),
+        fork(watchSignUp),
     ]);
 };
