@@ -1904,3 +1904,62 @@ export const initialState = {
     userInfo: null, // 다른사람의 정보
 };
 ```
+
+# Login Redux 사이클
+- axios 설치
+    - 서버통신은 axios사용을 추천 구글도사용함.
+    - npm i axios
+
+- LoginForm > 로그인 요청 
+- LOG_IN_REQUEST 액션을 dispatch
+```javascript
+dispatch({
+    type: LOG_IN_REQUEST,
+    data: {
+        id, password,
+    }
+});
+
+
+```
+
+- Reducer 에서 해당 액션 에대한 처리
+```javascript
+case LOG_IN_REQUEST: {
+    return {
+        ...state,
+        isLoggingIn: true,
+        loginErrorReason: '',
+    }
+}
+case LOG_IN_SUCCESS: {
+    return {
+        ...state,
+        isLoggingIn: false,
+        isLoggedIn: true,
+        me: dummyUser,
+        isLoading: false,
+    }
+}
+```
+
+- saga에서 캐치, 1초뒤 로그인 성공 액션 디스패치
+```javascript
+function* login () {
+    try {
+        yield delay(1000);
+        yield put({ 
+            type: LOG_IN_SUCCESS,
+        })
+    } catch (e){ // 로그인 실패시
+        console.error(e);
+        yield put({
+            type: LOG_IN_FAILURE,
+        });
+    }
+}
+
+function* watchLogin () {
+    yield takeEvery(LOG_IN_REQUEST, login);
+}
+```

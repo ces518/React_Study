@@ -49,38 +49,19 @@ export const REMOVE_FOLLOWER_FAILURE = 'REMOVE_FOLLOWER_FAILURE';
 
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME'; // 중요한 액션, reducer의 단점때문에 어쩔수 없이 만든 액션
 
-export const loginAction = {
-    type: LOG_IN_REQUEST,
-    data: {
-
-    }
-};
-
-export const logoutAction = {
-    type: LOG_OUT_REQUEST,
-};
-
-export const signupAction = (data) => ({ // 바로 리턴하는함수는 소괄호로 사용
-    type: SIGN_UP_REQUEST,
-    data: data
-});
-
-export const signupSuccess = {
-    type: SIGN_UP_SUCCESS,
-};
-
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case LOG_IN_REQUEST: {
             return {
                 ...state,
-                loginData: action.data,
-                isLoading: true,
+                isLoggingIn: true,
+                loginErrorReason: '',
             }
         }
         case LOG_IN_SUCCESS: {
             return {
                 ...state,
+                isLoggingIn: false,
                 isLoggedIn: true,
                 me: dummyUser,
                 isLoading: false,
@@ -90,6 +71,7 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 isLoggedIn: false,
+                loginErrorReason: action.error,
                 me: null,
             }
         }

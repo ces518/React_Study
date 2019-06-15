@@ -22,8 +22,7 @@ function logger () {
 
 function* login () {
     try {
-        yield fork(logger); // logger 는 로깅을 하는 함수 10초걸림
-        yield call(loginAPI); // 로그인 성공시
+        yield delay(1000);
         // 응답을 받고 난뒤 put을 보낸다.
         yield put({ // put 은 dispatch와 동일
             type: LOG_IN_SUCCESS,
@@ -39,13 +38,7 @@ function* login () {
 // LOG_IN 을 받으면 LOG_IN_SUCCESS를 자동적으로 실행한다
 // 반복문 내에 존재하지 않기때문에 1회만 받게됨.
 function* watchLogin () {
-    while (true) {
-        yield take(LOG_IN_REQUEST);
-        yield delay(2000);
-        yield put({ // redux의 dispatch와 동일
-            type: LOG_IN_SUCCESS,
-        });
-    }
+    yield takeEvery(LOG_IN_REQUEST, login);
 }
 
 function* watchHello () {

@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { LOG_IN_SUCCESS, LOG_OUT_SUCCESS, loginAction, logoutAction } from '../reducers/user';
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
 
