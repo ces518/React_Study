@@ -2018,3 +2018,19 @@ export default function* postSaga() {
 ```
 
 * FORM 사용시는 무조건 preventDefault() 로 폼서브밋을 막아주어야한다.
+
+
+# next-router로 페이지 이동
+- useEffect 의 값을 비교할때 기본 자료형을 사용할것.
+- 객체 비교의경우 비추천 
+
+- 회원가입 페이지의 경우 로그인상태가 되면 들어와선 안되기 때문에 
+- 로그인 상태일경우 메인페이지로 이동해준다.
+```javascript
+    useEffect(() => {
+        if (me) { // 로그인해서 로그인정보가 존재할경우 메인페이지로 이동하게끔
+            alert('로그인상태가 되어 메인페이지로 이동합니다.');
+            Router.push('/'); //
+        }
+    }, [me && me.id]);
+```

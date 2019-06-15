@@ -1,5 +1,6 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import Router from 'next/router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Checkbox, Form, Input } from "antd";
 import { SIGN_UP_REQUEST } from "../reducers/user";
@@ -33,7 +34,15 @@ const Signup = () => {
     const [passwordError, setPasswordError] = useState(false);
     const [termError, setTermError] = useState(false);
     const dispatch = useDispatch();
-    const { isSigningUp } = useSelector(state => state.user);
+    const { isSigningUp, me } = useSelector(state => state.user);
+
+    useEffect(() => {
+        if (me) { // 로그인해서 로그인정보가 존재할경우 메인페이지로 이동하게끔
+            alert('로그인상태가 되어 메인페이지로 이동합니다.');
+            Router.push('/'); //
+        }
+    }, [me && me.id]);
+
     const onSubmit = useCallback((e) => {
         e.preventDefault();
 
