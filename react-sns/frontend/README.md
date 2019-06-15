@@ -1985,3 +1985,36 @@ function* signUp () {
     }
 }
 ```
+
+
+# 게시글 등록 사이클
+- SAGA 작성, 기존과 동일한 구성의 SAGA를 작성
+- 현재는 서버가 없는 상태기때문에 delay 2초를 준다 (임시)
+```javascript
+function* addPost () {
+    try {
+        yield delay(2000);
+        yield put({
+            type: ADD_POST_SUCCESS,
+        });
+    } catch (e) {
+        console.error(e);
+        yield put({
+            type: ADD_POST_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchAddPost () {
+    yield takeLatest(ADD_POST_REQUEST, addPost);
+}
+
+export default function* postSaga() {
+    yield all([
+        fork(watchAddPost),
+    ]);
+};
+```
+
+* FORM 사용시는 무조건 preventDefault() 로 폼서브밋을 막아주어야한다.
