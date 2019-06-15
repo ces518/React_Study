@@ -1768,3 +1768,30 @@ function* watchHelloTakeEvery () {
 ```
 
 - 매 요청이 유효할경우 takeEvery, 마지막 요청만 유효할경우 takeLatest를 사용하자.
+
+# fork call 
+- 함수호출시 fork, call 이라는 개념이 존재한다.
+- 기본적으로 둘다 함수를 실행해준다.
+- call: 동기호출
+    - 응답이 올때까지 대기한다.
+- fork: 비동기호출
+
+* 로직의 순서가 중요한경우 call을 사용한다.
+
+```javascript
+function* login () {
+    try {
+        yield fork(logger); // logger 는 로깅을 하는 함수 10초걸림
+        yield call(loginAPI); // 로그인 성공시
+        // 응답을 받고 난뒤 put을 보낸다.
+        yield put({ // put 은 dispatch와 동일
+            type: LOG_IN_SUCCESS,
+        })
+    } catch (e){ // 로그인 실패시
+        console.error(e);
+        yield put({
+            type: LOG_IN_FAILURE,
+        });
+    }
+}
+```

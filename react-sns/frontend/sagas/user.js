@@ -8,9 +8,15 @@ function loginAPI () {
     // 서버에 요청을 보내는 부분
 }
 
+function logger () {
+    // ...
+}
+
 function* login () {
     try {
+        yield fork(logger); // logger 는 로깅을 하는 함수 10초걸림
         yield call(loginAPI); // 로그인 성공시
+        // 응답을 받고 난뒤 put을 보낸다.
         yield put({ // put 은 dispatch와 동일
             type: LOG_IN_SUCCESS,
         })
@@ -69,9 +75,11 @@ export default function* userSaga() {
     // ]);
 
     // 여러개 등록할때 all을 사용함.
+    // 기능상 문제가 되지는 않지만
+    // 이 이벤트리스너는 순서가 있지않기때문에 fork를 사용한다.
     yield all([
-        watchLogin(),
+        fork(watchLogin),
         // watchHello(),
-        watchSignup(),
+        fork(watchSignup),
     ]);
 };
