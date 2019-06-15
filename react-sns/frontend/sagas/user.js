@@ -71,7 +71,8 @@ function signUpApi() {
 
 function* signUp () {
     try {
-        yield call(signUpApi);
+        yield delay(2000);
+        throw new Error('의도적인 에러');
         yield put({
             type: SIGN_UP_SUCCESS,
         })
@@ -79,6 +80,7 @@ function* signUp () {
         console.error(e);
         yield put({
             type: SIGN_UP_FAILURE,
+            error: e,
         });
     }
 }

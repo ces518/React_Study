@@ -1963,3 +1963,25 @@ function* watchLogin () {
     yield takeEvery(LOG_IN_REQUEST, login);
 }
 ```
+
+# 회원가입 Redux 사이클
+- axios로 요청을 보내면 에러에 대한 이유를 객체로 제공함.
+- 강제로 에러를 발생해서 회원가입에 실패한것처럼 상황 만들기
+- 회원가입 요청시 강제로 에러를 발생시킴
+```javascript
+function* signUp () {
+    try {
+        yield call(signUpApi);
+        yield throw new Error('의도적인 에러');
+        yield put({
+            type: SIGN_UP_SUCCESS,
+        })
+    } catch (e){
+        console.error(e);
+        yield put({
+            type: SIGN_UP_FAILURE,
+            error: e,
+        });
+    }
+}
+```

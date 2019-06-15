@@ -85,7 +85,22 @@ const reducer = (state = initialState, action) => {
         case SIGN_UP_REQUEST: {
             return {
                ...state,
-                signUpData: action.data,
+                isSigningUp: true,
+                signUpErrorReason: '',
+            }
+        }
+        case SIGN_UP_SUCCESS: {
+            return {
+                ...state,
+                isSigningUp: false,
+                isSignedUp: true,
+            }
+        }
+        case SIGN_UP_FAILURE: {
+            return {
+                ...state,
+                isSigningUp: false,
+                signUpErrorReason: action.error // saga에서 넣어준 error가 여기로전달됨.
             }
         }
         default: {
