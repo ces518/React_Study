@@ -1795,3 +1795,18 @@ function* login () {
     }
 }
 ```
+
+
+# Redux-SAGA Pattern
+- 로그인 요청 (LOG_IN_REQUEST)
+- (서버통신)
+- 로그인성공 or 로그인 실패 (LOG_IN_SUCCESS, LOG_IN_FAILURE)
+
+- 비동기 요청시 REQUEST로 통일
+- 3종이 세트
+    - _REQUEST
+    - _SUCCESS
+    - _FAILURE
+- 해당 3종 세트는 SAGA 로 식별이 가능하게 통일
+
+* 어떤 액션이 어디에 존재하는지 빠른 식별이 가능한 패턴을 만들것.
