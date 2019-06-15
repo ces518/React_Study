@@ -2034,3 +2034,165 @@ export default function* postSaga() {
         }
     }, [me && me.id]);
 ```
+
+# 댓글 컴포넌트
+- useCallback을 사용할때는 기본 자료형을 사용할것.
+- 리액트와 제이쿼리는 웬만하면 같이 쓰지말것. (최후의 수단)
+
+- 댓글 컴포넌트 랜더링
+```javascript
+const PostCard = ({ post }) => {
+    const [ commentFormOpened, setCommentFormOpened ] = useState(false);
+    const [ commentText, setCommentText ] = useState('');
+    const { me } = useSelector(state => state.user);
+    const { isAddingComment, commentAdded } = useSelector(state => state.post);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        setCommentText('');
+    }, [commentAdded === true]);
+
+    const onToggleComment = useCallback(() => {
+      setCommentFormOpened(prev => !prev);
+    }, []);
+
+    const onChangeCommentText = useCallback((e) => {
+        setCommentText(e.target.value);
+    }, []);
+
+    const onSubmitComment = useCallback((e) => {
+        e.preventDefault();
+        if (!me) { // 로그인한 사용자만 가능하도록 처리
+            return alert('로그인이 필요합니다.');
+        }
+        return dispatch({
+            type: ADD_COMMENT_REQUEST,
+            data: {
+                postId: post.id,
+            }
+        });
+    }, [me && me.id]); // 객체 말고 기본자료형을 넣어줄것.
+
+    return (
+        <div>
+            <Card
+                key={+post.createdAt}
+                cover={post.img && <img alt="example" src={post.img} />}
+                actions={[
+                    <Icon type="retweet" key="retweet" />,
+                    <Icon type="heart" key="heart" />,
+                    <Icon type="message" key="message" onClick={onToggleComment}/>,
+                    <Icon type="ellipsis" key="ellipsis" />,
+
+                ]}
+                extra={<Button>팔로우</Button>}
+            >
+                <Card.Meta
+                    avatar={<Avatar>{post.user.nickname[0]}</Avatar>}
+                    title={post.user.nickname}
+                    description={post.content}
+                />
+            </Card>
+            { commentFormOpened && (
+                <>
+                    <Form onSubmit={onSubmitComment}>
+                        <Form.Item>
+                            <Input.TextArea rows={4} value={commentText} onChange={onChangeCommentText}/>
+                        </Form.Item>
+                        <Button type="primary" htmlType="submit" loading={isAddingComment}>삐약</Button>
+                    </Form>
+                    <List
+                        header={ `${post.comments ? post.comments.length : 0 } 댓글`}
+                        itemLayout="horizontal"
+                        dataSource={post.comments || []}
+                        renderItem={item => (
+                            <li>
+                                <Comment
+                                    author={item.user.nickname}
+                                    avatar={<Avatar>{item.user.nickname[0]}</Avatar>}
+                                    content={item.content}
+                                />
+                            </li>
+                        )}
+                    />
+                </>
+            )}
+        </div>
+    )
+};
+
+PostCard.proptypes = {
+    post: PropTypes.shape({
+        User: PropTypes.object,
+        content: PropTypes.string,
+        img: PropTypes.string,
+        createdAt: PropTypes.object,
+    }),
+};
+
+export default PostCard;
+```
+
+- reducer 작성
+```javascript
+case ADD_COMMENT_REQUEST: {
+    return {
+        ...state,
+        isAddingComment: true,
+        addCommentErrorReason: '',
+        commentAdded: false,
+    }
+}
+case ADD_COMMENT_SUCCESS: {
+    /*
+    * 불변성을 지켜줘야하기 때문에 로직이 복잡해짐
+    * */
+    const postIndex = state.mainPosts.findIndex(v => v.id === action.data.postId);
+    const post = state.mainPosts[postIndex];
+    const comments = [...post.comments, dummyComment];
+    const mainPosts = [...state.mainPosts];
+    mainPosts[postIndex] = {...post, comments};
+
+    return {
+        ...state,
+        isAddingComment: false,
+        mainPosts,
+        commentAdded: true,
+    }
+}
+case ADD_COMMENT_FAILURE: {
+    return {
+        ...state,
+        isAddingComment: false,
+        addCommentErrorReason: action.error,
+        commentAdded: false,
+    }
+}
+```
+
+- SAGA 작성
+```javascript
+function* addComment (action) {
+    // REQUEST action을 받을 수 있다.
+    try {
+        yield delay(2000);
+        yield put({
+            type: ADD_COMMENT_SUCCESS,
+            data: {
+                postId: action.data.postId,
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        yield put({
+            type: ADD_COMMENT_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchAddComment () {
+    yield takeLatest(ADD_COMMENT_REQUEST, addComment);
+}
+
+```
