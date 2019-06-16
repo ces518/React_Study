@@ -42,5 +42,104 @@
   "exec": "node index.js",
   "ext": "js json"
 }
+```
+
+
+# http 요청 주소체계 이해
+- index.js 가 서버의 실행점이 됨
+- express 모듈을 사용한다.
+- express 모듈로 app 객체를 생성하여 8080 포트로 서버 시작.
+- get '/' 으로 요청을 보내면 'Hello Express' 라는 문자열을 리턴한다.
+```javascript
+const express = require('express');
+
+const app = express();
+
+
+app.get('/', (req, res) => {
+    res.send('Hello Express');
+});
+
+// 8080 포트로 서버 기동
+app.listen(8080, () => {
+    console.log(`server is running on localhost:8080`);
+});
+
+```
+
+- 프론트, 백엔드 통신시 RESTAPI, GRAPH_QL 방식을 가장 많이 사용한다.
+
+# Sequelize, ERD
+- 시퀄라이즈 명령어 등록
+    - npm i -g sequelize-cli
+- sequelize init 
+    - config.json 에 데이터베이스 연결설정
+    - models/index.js 설정 변경
+````javascript
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const basename = path.basename(__filename);
+const env = process.env.NODE_ENV || 'development';
+const config = require('../config/config.json')[env];
+const db = {};
+
+// config.json develop 부분을 불러와서 초기화해준다. (설정 적용)
+let sequelize = new Sequelize(config.database, config.username, config.password, config);
+
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
+````
+
+- models 디렉터리에 존재하는것이 테이블이라 생각
+- 각 테이블에 해당하는 모델 생성
+    - comment.js
+    - hashtag.js
+    - image.js
+    - post.js
+    - user.js 
+
+- user 엔티티 정의
+```javascript
+module.exports = (sequelize, DataTypes) => {
+
+    // user 엔티티 정의
+    const User = sequelize.define('User', {
+        nickname: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+        },
+        userId: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+            unique: true,
+        },
+        password: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+        },
+    }, {
+        charset: 'utf8',
+        collate: 'utf-_general_ci',
+    });
+
+    // user 엔티티의 관계 정의
+    User.associate = (db) => {
+        db.User.hasMany(db.Post);
+        db.User.hasMany(db.Comment);
+    };
+
+    return User;
+};
 
 ```
