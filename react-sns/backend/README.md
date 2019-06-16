@@ -141,5 +141,88 @@ module.exports = (sequelize, DataTypes) => {
 
     return User;
 };
+```
+
+# 엔티티 의 관계 
+- 엔티티의 관계정의
+    - Post의 관계를 정의한다
+    - User와 N:1
+    - Comment와 1:N
+```javascript
+    Post.associate = (db) => {
+        db.Post.belongsTo(db.User);
+        db.Post.hasMany(db.Comment);
+        db.Post.hasMany(db.Image);
+    };
+```
+
+- 다대다 관계의 경우에는 조금 특이하다.
+    - 관계 테이블이 존재하기 때문에 through 로 관계테이블을 정의해주어야한다.
+```javascript
+    Hashtag.associate = (db) => {
+        db.Hashtag.belongsToMany(db.User, { through: 'PostHashtag'}); // 다대다 관계의 경우 관계사이의 테이블정의
+    };
+```
+
+- user 엔티티의 관계 
+```javascript
+    // user 엔티티의 관계 정의
+    User.associate = (db) => {
+        db.User.hasMany(db.Post, { as: 'Posts' }); // 관계 조합이 같을경우 as 로 구분을 지어줄것.
+        db.User.hasMany(db.Comment);
+        db.User.belongsToMany(db.Post, { through: 'Like', as: 'Liked' }); // 게시글 좋아요 관계
+        db.User.belongsToMany(db.User, { through: 'Follow', as: 'Followers' }); // 팔로잉, 팔로우 관계
+        db.User.belongsToMany(db.User, { through: 'Follow', as: 'Followings' }); // 본인과의 관계일경우 두번 명시해줘야함.
+    };
+```
+
+* as 를 사용할 경우
+- 관계가 같을경우 구분이 가지않기때문에 as로 구분을 지어준다.
+- as를 사용할경우 해당 관계의 엔티티를 as의 이름으로 가져오게된다.
+```javascript
+// as 를 사용할경우 그 관계에 해당하는 데이터를 as의 이름으로 가져온다.
+ const user = {
+   id: 1,
+   nickname: 'park',
+   Liked: [{게시글}, {게시글2}],
+ };
 
 ```
+
+* mysql2 설치  (mysql 사용)
+    - npm i mysql2
+
+- sequelize 와 각 엔티티들을 연결
+- models/index.js
+```javascript
+/**
+ *  각 엔티티들을 sequelize 와 연결
+ */
+db.Comment = require('./comment')(sequelize, Sequelize);
+db.Hashtag = require('./hashtag')(sequelize, Sequelize);
+db.Image = require('./image')(sequelize, Sequelize);
+db.Post = require('./post')(sequelize, Sequelize);
+db.User = require('./user')(sequelize, Sequelize);
+```
+
+- 연결후 index.js 에서 시퀄라이즈 싱크설정
+```javascript
+const express = require('express');
+const db = require('./models');
+const app = express();
+db.sequelize.sync(); // 테이블자동 생성
+
+app.get('/', (req, res) => {
+    res.send('Hello Express');
+});
+
+app.get('/about', (req, res) => {
+   res.send('Hello, About');
+});
+
+// 8080 포트로 서버 기동
+app.listen(3065, () => {
+    console.log(`server is running on localhost:3065`);
+});
+
+``` 
