@@ -65,14 +65,13 @@ function* watchHelloTakeEvery () {
     });
 }
 
-function signUpApi() {
-
+function signUpApi(signUpData) {
+    return axios.post('http://localhost:3065/api/users/', signUpData); // axios가 post 요청을 보낸다.
 }
 
-function* signUp () {
+function* signUp (action) {
     try {
-        yield delay(2000);
-        throw new Error('의도적인 에러');
+        yield call(signUpApi, action.data);// id, password, nickname이 들어있음.
         yield put({
             type: SIGN_UP_SUCCESS,
         })

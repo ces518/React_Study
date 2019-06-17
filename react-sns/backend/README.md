@@ -346,3 +346,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 //
 ```
+
+# 회원가입 과 미들웨어
+- 요청에 대한 로깅 처리를 하기위해 morgan 미들웨어 활성화
+
+- index.js
+```javascript
+const morgan = require('morgan'); // 로깅
+// 요청에 대한 로깅
+app.use(morgan('dev'));
+```
+- 미들웨어
+    - 미들웨어는 요청과 응답사이에 존재하며 요청, 응답을 변조한다.
+    - app.use(); 로 활성화한다.
+    - app.use('url', func); // url별로 미들웨어를 사용할수있지만 모든 요청에 사용하는경우 url을 생략.
+
+* CORS 이슈 발생
+- 아무런 설정을 하지않았기때문에 CORS문제가 발생.
+    - 서로다른 도메인간에 통신을 제한
+    - 해당 요청을 허용해야 통신이 가능하다.
+```javascript
+const cors = require('cors'); // CORS
+app.use(cors()); // CORS 미들웨어 활성화
+```
+
+* sequelize 는 생성일, 수정일을 자동으로 갱신해준다.
