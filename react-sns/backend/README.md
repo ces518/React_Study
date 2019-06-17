@@ -226,3 +226,73 @@ app.listen(3065, () => {
 });
 
 ``` 
+
+# 백엔드서버 API 만들기
+- handler Function을 미리 설계 (라우터)
+- 각 해당 엔티티 별로 컨트롤러를 만드는것이좋음.
+- import, export는 사용비추. 
+- require, module.exports 를 사용한다고 생각.
+
+- index.js 파일 하나에 모든 라우터들을 생성하게되면 가독성도 좋지않고 유지보수가 힘들기때문에
+- 코드를 분리한다.
+    - routes/{name}.js 로 한 관련 라우터들을 한파일에 집중
+    - index.js 에서 모듈을 불러와서 사용한다.
+    - app.use('url'); 에서 url에 해당하는 부분이 해당 라우터의 공통 url이 된다. (@RequestMapping 의 개념)
+- index.js
+```javascript
+const userAPIRouter = require('./routes/user');
+app.use('/api/users', userAPIRouter);
+```
+
+- routes/user.js
+```javascript
+const express = require('express');
+const router = express.Router();
+
+// 유저목록 조회
+router.get('/', (req, res) => {
+
+});
+
+// 유저 상세조회
+router.get('/:id', (req, res) => { // :id 은 파라메터를 의미한다. pathvariable개념
+
+});
+
+// 회원가입
+router.post('/', (req, res) => {
+
+});
+
+// 로그아웃
+router.post('/logout', (req, res) => {
+
+});
+
+// 로그인
+router.post('/login', (req, res) => {
+
+});
+// 팔로우목록
+router.get('/:id/follow', (req, res) => {
+
+});
+// 팔로우등록
+router.post('/:id/follow', (req, res) => {
+
+});
+// 팔로우 취소
+router.delete('/:id/follow', (req, res) => {
+
+});
+// 팔로워 취소
+router.delete('/:id/follower', (req, res) => {
+
+});
+// 게시글 가져오기
+router.get('/:id/posts', (req, res) => {
+
+});
+
+module.exports = router;
+```
