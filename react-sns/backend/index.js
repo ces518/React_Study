@@ -5,6 +5,11 @@ const userAPIRouter = require('./routes/user');
 const postAPIRouter = require('./routes/post');
 db.sequelize.sync(); // 테이블 생성
 
+// form 데이터를 처리하는 부분
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+//
+
 app.use('/api/users', userAPIRouter);
 app.use('/api/posts', postAPIRouter);
 
