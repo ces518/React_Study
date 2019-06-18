@@ -4,6 +4,7 @@ const cors = require('cors'); // CORS
 const cookieParser = require('cookie-parser');
 const expressSession = require('express-session');
 const dotenv = require('dotenv'); // .env파일에서 읽어온 환경변수를 process.env에 넣어준다.
+const passport = require('passport');
 
 const db = require('./models');
 const app = express();
@@ -32,6 +33,10 @@ app.use(expressSession({
 }));
 // 요청에 대한 로깅
 app.use(morgan('dev'));
+
+// passport 세션은 expressSession을 사용하기때문에 expressSession 활성화 이후에 활성화해주어야한다.
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/api/users', userAPIRouter);
 app.use('/api/posts', postAPIRouter);

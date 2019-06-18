@@ -386,7 +386,7 @@ app.use(cors()); // CORS 미들웨어 활성화
 const cookieParser = require('cookie-parser');
 const expressSession = require('express-session');
 const dotenv = require('dotenv'); // .env파일에서 읽어온 환경변수를 process.env에 넣어준다.
-
+dotenv.config();
 // 쿠키파싱
 app.use(cookieParser(process.env.COOKIE_SECRET)); // 쿠키암호화 키
 // 세션
@@ -399,4 +399,41 @@ app.use(expressSession({
         secure: false, //https시 true
     }
 }));
+```
+
+# passport와 쿠키, 세션
+- 로그인 처리시 쿠키와 세션을 이용하여 통신을 하는데 이 과정이 복잡하고 번거롭기때문에
+- 이를 자동화 해주는 passport를 사용함
+```javascript
+const passport = require('passport');
+```
+- 서버쪽에 사용자 데이터를 모두 가지고있으면 데이터가 너무 많기때문에 서버쪽 메모리에 무리가온다.
+- 서버쪽에는 최소한의 사용자데이터 (PK값 등 고유 식별자) 와 쿠키를 이용하여 세션을 관리하고
+- 클라이언트에서 쿠키를 보내면 해당 쿠키와 연관된 고유 식별자를 활용하여 사용자정보를 DB에서 불러오는 형태이다.
+ 
+- passport/index.js, passport/local.js 생성
+- index.js
+```javascript
+const passport = require('passport');
+const db = require('../models');
+
+module.exports = () => {
+    // 사용자 정보가 너무많기때문에 id값만 가지고있음.
+  passport.serializeUser((user ,done) => { // 서버쪽에 [{ id: 3, cookie: `asdfgh` }] 형태로 저장해둔다.
+      return done(null, user.id);
+  });
+
+  passport.deserializeUser(async (id ,done) => { // cookie를 프론트에서 보내면 해당 쿠키와 연관된 id를 기반으로 유저정보를 조회해온다.
+     try {
+         const user = await db.User.findOne({
+             where: { id },
+         });
+        return done(null, user);
+     } catch (e) {
+         console.error(e);
+         return done(e);
+     }
+  });
+};
+
 ```
