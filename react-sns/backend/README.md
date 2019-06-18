@@ -371,3 +371,32 @@ app.use(cors()); // CORS 미들웨어 활성화
 ```
 
 * sequelize 는 생성일, 수정일을 자동으로 갱신해준다.
+
+
+# 로그인을 위한 미들웨어
+- 프론트서버와 백엔드가 분리되어있기때문에 로그인상태는 백엔드서버만이 알고있음.
+- 프론트서버는 이를 모르기때문에 서로간의 인증상태를 알아야함.
+- 보통 쿠키로 한다.
+- 사용자 정보는 서버의 세션에 저장, 프론트에는 세션을 조회할수 있는 쿠키를 전달
+
+- cookie, session 활성화
+- 중요한 환경변수들은 dotenv를 활용하여 관리 (소스코드에 직접 노출하지않는다.)
+- .env파일에 키, 벨류 쌍으로 정의한다 (.properties개념)
+```javascript
+const cookieParser = require('cookie-parser');
+const expressSession = require('express-session');
+const dotenv = require('dotenv'); // .env파일에서 읽어온 환경변수를 process.env에 넣어준다.
+
+// 쿠키파싱
+app.use(cookieParser(process.env.COOKIE_SECRET)); // 쿠키암호화 키
+// 세션
+app.use(expressSession({
+    resave: false,// 매번 세션강제저장
+    saveUninitialized: false, //빈값도저장
+    secret: process.env.COOKIE_SECRET,
+    cookie: { // js에서 쿠키에 접근하지못한다.
+        httpOnly: true,
+        secure: false, //https시 true
+    }
+}));
+```
