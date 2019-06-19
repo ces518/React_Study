@@ -1,6 +1,6 @@
 const passport = require('passport');
 const db = require('../models');
-
+const local = require('./local');
 module.exports = () => {
     // 사용자 정보가 너무많기때문에 id값만 가지고있음.
   passport.serializeUser((user ,done) => { // 서버쪽에 [{ id: 3, cookie: `asdfgh` }] 형태로 저장해둔다.
@@ -18,4 +18,5 @@ module.exports = () => {
          return done(e);
      }
   });
+  local();
 };

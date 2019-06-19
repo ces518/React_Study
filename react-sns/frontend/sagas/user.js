@@ -11,19 +11,18 @@ import axios from 'axios';
 
 const HELLO_SAGA = 'HELLO_SAGA';
 
-function loginAPI () {
+function loginAPI (data) {
     // 서버에 요청을 보내는 부분
-    return axios.post('/login');
+    return axios.post('/login', data);
 }
 
 function logger () {
     // ...
 }
 
-function* login () {
+function* login (action) {
     try {
-        yield delay(1000);
-        // 응답을 받고 난뒤 put을 보낸다.
+        yield loginAPI(action.data);
         yield put({ // put 은 dispatch와 동일
             type: LOG_IN_SUCCESS,
         })

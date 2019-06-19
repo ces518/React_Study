@@ -13,6 +13,7 @@ const postAPIRouter = require('./routes/post');
 db.sequelize.sync(); // 테이블 생성
 
 dotenv.config();
+passport.config(); // passport 활성화
 
 // form 데이터를 처리하는 부분
 app.use(express.json());

@@ -437,3 +437,123 @@ module.exports = () => {
 };
 
 ```
+
+
+# passport 로그인 전략
+- 로그인 전략은 크게 2가지로 나뉜다.
+- LOCAL: 아이디 패스워드를 통한 로그인 
+- SOCIAL(kakao, naver 등): 소셜로그인
+
+- 로컬전략을 사용하기위해 local.js에 전략을 작성
+    - passport에서의 done은 3개의 인자가 존재한다.
+    - 1번째인자는 서버에러이다. 서버에러가 발생하면 1을 넣어준다.
+    - 2번째인자는 성공시이다. 로그인이 성공하면 유저객체를 넣어준다.
+    - 3번째인자는 로그인프로세스중 실패할경우 로직실패 이유를 넣어준다.
+```javascript
+const passport = require('passport');
+const { Strategy, LocalStrategry } = require('passport-local');
+const bcrypt = require('bcrypt');
+const db = require('../models');
+
+module.exports = () => {
+    passport.use(new LocalStrategry({
+        usernameField: 'userId',
+        passwordField: 'password',
+    }, async (userId, password, done) => {
+        try {
+            const user = await db.User.findOne({
+                where: {
+                    userId,
+                }
+            });
+
+            if (!user) {
+                // done의 1번 인자 : 서버에러 , 서버에러발생시 1을 넣어줌
+                // 2번 인자: 성공여부
+                // 3번 인자: 로직상에 에러가 나는경우.. 강제로 중단해야할때 3번인자 사용
+                return done(null, false, { reason: '존재하지않는 사용자입니다.' });
+            }
+
+            const result = await bcrypt.compare(password, user.password); // 패스워드 비교
+            if (result) {
+                return done(null, user); // 성공시 2번째 인수를 사용한다.
+            }
+            return done(null, false, { reason: '비밀번호가 올바르지 않습니다.' }); // 로그인 실패
+        } catch (e) {
+            console.error(e);
+            return done(e);
+        }
+    }));
+};
+```
+
+- 로컬전략을 작성해준후 passport/index.js에 연결해준다
+```javascript
+module.exports = () => {
+    // 사용자 정보가 너무많기때문에 id값만 가지고있음.
+  passport.serializeUser((user ,done) => { // 서버쪽에 [{ id: 3, cookie: `asdfgh` }] 형태로 저장해둔다.
+      return done(null, user.id);
+  });
+
+  passport.deserializeUser(async (id ,done) => { // cookie를 프론트에서 보내면 해당 쿠키와 연관된 id를 기반으로 유저정보를 조회해온다.
+     try {
+         const user = await db.User.findOne({
+             where: { id },
+         });
+        return done(null, user);
+     } catch (e) {
+         console.error(e);
+         return done(e);
+     }
+  });
+  local();
+};
+```
+
+- express의 index.js에서 passport모듈을 불러와 활성화 시켜준다.
+```javascript
+const passport = require('passport');
+passport.config();
+```
+
+- 사용자가 로그인을 요청할경우 routes/user.js 의 핸들러로 요청을 받는다.
+- passport전략을 사용하도록 핸들러코드 작성
+
+- routes/user.js
+    - passport.authenticate의 첫번째 인자는 전략
+        - local, kakako, naver 등 전략을 매핑해준다.
+        - 2번째 인자는 passport전략에서 done으로 보내준 값들이다.
+        - 첫번째인자는 서버에러
+        - 두번째인자는 성공시 유저정보
+        - 세번째인자는 로직 실패이유
+        
+- 로그인에 성공한다면 유저객체를 json형태로 클라이언트로 보내주는데
+- 그대로 보낸다면 패스워드가 존재하여 보안삼 위험하다
+- password부분을 제거한후 보내준다.
+```javascript
+// 로그인
+router.post('/login', (req, res) => { // 로그인 전략을 실행해주어야한다.
+    // 로컬전략으로 실행
+    passport.authenticate('local', (err, user, info) => { // passport에서 done으로 넘긴정보를 인자로받음.
+        // err: 서버에러
+        // user: 로그인성공시 유저정보
+        // info: 로직실패 정보
+        if (err) {
+            console.error(err);
+            return next(err);
+        }
+        if (info) {
+            return res.status(401).send(info.reason);
+        }
+        return req.login(user ,(loginErr) => {
+            if (loginErr) { // 로그인 실패시
+                return next(loginErr);
+            }
+            // 로그인 유저정보에는 패스워드가포함되어 있기 때문에 보안상 위험하다.
+            const filteredUser = Object.assign({}, user); // 얕은복사후
+            delete filteredUser.password; // 패스워드 부분삭제
+            return res.json(filteredUser); // 클라이언트로 전송
+        });
+    });
+});
+```

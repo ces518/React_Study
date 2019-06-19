@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../models');
 const bcrypt = require('bcrypt');
 const router = express.Router();
-
+const passport = require('passport');
 // 유저목록 조회
 router.get('/', (req, res) => {
 
@@ -52,8 +52,29 @@ router.post('/logout', (req, res) => {
 });
 
 // 로그인
-router.post('/login', (req, res) => {
-
+router.post('/login', (req, res) => { // 로그인 전략을 실행해주어야한다.
+    // 로컬전략으로 실행
+    passport.authenticate('local', (err, user, info) => { // passport에서 done으로 넘긴정보를 인자로받음.
+        // err: 서버에러
+        // user: 로그인성공시 유저정보
+        // info: 로직실패 정보
+        if (err) {
+            console.error(err);
+            return next(err);
+        }
+        if (info) {
+            return res.status(401).send(info.reason);
+        }
+        return req.login(user ,(loginErr) => {
+            if (loginErr) { // 로그인 실패시
+                return next(loginErr);
+            }
+            // 로그인 유저정보에는 패스워드가포함되어 있기 때문에 보안상 위험하다.
+            const filteredUser = Object.assign({}, user); // 얕은복사후
+            delete filteredUser.password; // 패스워드 부분삭제
+            return res.json(filteredUser); // 클라이언트로 전송
+        });
+    });
 });
 // 팔로우목록
 router.get('/:id/follow', (req, res) => {
