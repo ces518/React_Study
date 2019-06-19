@@ -451,12 +451,12 @@ module.exports = () => {
     - 3번째인자는 로그인프로세스중 실패할경우 로직실패 이유를 넣어준다.
 ```javascript
 const passport = require('passport');
-const { Strategy, LocalStrategry } = require('passport-local');
+const { Strategy: LocalStrategry } = require('passport-local');
 const bcrypt = require('bcrypt');
 const db = require('../models');
 
 module.exports = () => {
-    passport.use(new LocalStrategry({
+    passport.use(new LocalStrategy({
         usernameField: 'userId',
         passwordField: 'password',
     }, async (userId, password, done) => {
