@@ -8,12 +8,12 @@ import {
     SIGN_UP_FAILURE
 } from "../reducers/user";
 import axios from 'axios';
-
+axios.defaults.baseURL = 'http://localhost:3065/api';
 const HELLO_SAGA = 'HELLO_SAGA';
 
 function loginAPI (data) {
     // 서버에 요청을 보내는 부분
-    return axios.post('/login', data);
+    return axios.post('/users/login', data);
 }
 
 function logger () {
@@ -22,9 +22,10 @@ function logger () {
 
 function* login (action) {
     try {
-        yield loginAPI(action.data);
+        const result = yield call(loginAPI, action.data); // axios의 결과는 result.data에 존재한다.
         yield put({ // put 은 dispatch와 동일
             type: LOG_IN_SUCCESS,
+            data: result.data,
         })
     } catch (e){ // 로그인 실패시
         console.error(e);

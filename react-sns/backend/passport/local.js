@@ -1,10 +1,10 @@
 const passport = require('passport');
-const { Strategy, LocalStrategry } = require('passport-local');
+const { Strategy: LocalStrategy } = require('passport-local');
 const bcrypt = require('bcrypt');
 const db = require('../models');
 
 module.exports = () => {
-    passport.use(new LocalStrategry({
+    passport.use(new LocalStrategy({
         usernameField: 'userId',
         passwordField: 'password',
     }, async (userId, password, done) => {

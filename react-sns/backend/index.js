@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const expressSession = require('express-session');
 const dotenv = require('dotenv'); // .env파일에서 읽어온 환경변수를 process.env에 넣어준다.
 const passport = require('passport');
-
+const passportConfig = require('./passport');
 const db = require('./models');
 const app = express();
 const userAPIRouter = require('./routes/user');
@@ -13,7 +13,7 @@ const postAPIRouter = require('./routes/post');
 db.sequelize.sync(); // 테이블 생성
 
 dotenv.config();
-passport.config(); // passport 활성화
+passportConfig(); // passport 활성화
 
 // form 데이터를 처리하는 부분
 app.use(express.json());

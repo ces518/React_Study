@@ -48,11 +48,13 @@ router.post('/', async (req, res, next) => {
 
 // 로그아웃
 router.post('/logout', (req, res) => {
-
+    req.logout();
+    req.session.destroy();
+    res.send('로그아웃 성공');
 });
 
 // 로그인
-router.post('/login', (req, res) => { // 로그인 전략을 실행해주어야한다.
+router.post('/login', (req, res, next) => { // 로그인 전략을 실행해주어야한다.
     // 로컬전략으로 실행
     passport.authenticate('local', (err, user, info) => { // passport에서 done으로 넘긴정보를 인자로받음.
         // err: 서버에러
@@ -70,11 +72,11 @@ router.post('/login', (req, res) => { // 로그인 전략을 실행해주어야�
                 return next(loginErr);
             }
             // 로그인 유저정보에는 패스워드가포함되어 있기 때문에 보안상 위험하다.
-            const filteredUser = Object.assign({}, user); // 얕은복사후
+            const filteredUser = Object.assign({}, user.toJSON()); // 얕은복사후
             delete filteredUser.password; // 패스워드 부분삭제
             return res.json(filteredUser); // 클라이언트로 전송
         });
-    });
+    })(req, res, next);
 });
 // 팔로우목록
 router.get('/:id/follow', (req, res) => {
