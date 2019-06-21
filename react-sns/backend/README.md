@@ -579,3 +579,52 @@ router.post('/logout', (req, res) => {
 ```javascript
 axios.defaults.baseURL = 'http://localhost:3065/api';
 ```
+
+# 다른 도메인간에 쿠키 주고받기
+- 보안적인 부분 때문에 https 가 필수이다.
+- 프론트와 서버간의 쿠키통신
+
+- 프론트쪽 활성화
+```javascript
+function loginAPI (data) {
+    // 서버에 요청을 보내는 부분
+    return axios.post('/users/login', data, {
+        withCredentials: true, // 서로 쿠키를 주고받는 통신을 한다.
+    });
+}
+```
+
+- 서버쪽 활성화
+```javascript
+// 서버쪽 통신
+app.use(cors({
+    origin: true,
+    credentials: true,
+}));
+```
+
+- 서로 다른 서버간의 쿠키통신 확인
+    - 브라우저 개발자도구 > 네트워크탭
+    - 응답 헤더에 해당 정보가 존재해야한다.
+    - connect.sid 가 서버에서 받아온 쿠키
+    - express의 기본 정보기 때문에 어떤 서버를 사용하는지 노출됨.
+```
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: http://localhost:3000
+```
+
+- 서버에서 쿠키명을 변경하는 설정해준다.
+    - 쿠키에 유효기간을 설정하는듯 처리도 해주면 좋음.
+```javascript
+// 세션
+app.use(expressSession({
+    resave: false,// 매번 세션강제저장
+    saveUninitialized: false, //빈값도저장
+    secret: process.env.COOKIE_SECRET,
+    cookie: { // js에서 쿠키에 접근하지못한다.
+        httpOnly: true,
+        secure: false, //https시 true
+    },
+    name: 'rbck'
+}));
+```

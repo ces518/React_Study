@@ -13,7 +13,9 @@ const HELLO_SAGA = 'HELLO_SAGA';
 
 function loginAPI (data) {
     // 서버에 요청을 보내는 부분
-    return axios.post('/users/login', data);
+    return axios.post('/users/login', data, {
+        withCredentials: true, // 서로 쿠키를 주고받는 통신을 한다.
+    });
 }
 
 function logger () {

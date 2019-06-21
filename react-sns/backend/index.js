@@ -19,7 +19,10 @@ passportConfig(); // passport 활성화
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // CORS 처리
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+}));
 // 쿠키파싱
 app.use(cookieParser(process.env.COOKIE_SECRET)); // 쿠키암호화 키
 // 세션
@@ -30,7 +33,8 @@ app.use(expressSession({
     cookie: { // js에서 쿠키에 접근하지못한다.
         httpOnly: true,
         secure: false, //https시 true
-    }
+    },
+    name: 'rbck'
 }));
 // 요청에 대한 로깅
 app.use(morgan('dev'));
