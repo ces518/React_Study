@@ -696,3 +696,90 @@ router.post('/login', (req, res, next) => { // 로그인 전략을 실행해주�
     })(req, res, next);
 });
 ```
+
+
+# 로그아웃과, 사용자정보 불러오기
+- 새로고침시 로그아웃이 풀리기때문에 사용자정보를 불러와주어야한다.
+
+- 서버쪽 핸들러
+```javascript
+// 내 정보 조회
+router.get('/', async (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).send('로그인이 필요합니다.');
+    }
+    try {
+        const user = req.user;
+        const fullUser = await db.User.findOne({
+            where: { id: user.id },
+            include: [{ // include로 관계를 정의해둔 엔티티까지 가져올 수 있음.
+                model: db.Post, // 엔티티타입
+                as: 'Posts',     // as 알리아스명
+                attributes: ['id'], // 모든 정보를 노출하면 보안상 위협이되기때문에 id속성만 가져온다.
+            }, {
+                model: db.User,
+                as: 'Followings',
+            }, {
+                model: db.User,
+                as: 'Followers',
+                attributes: ['id'],
+            }],
+            attributes: ['id', 'nickname', 'userId']
+        });
+        return res.json(fullUser);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```
+
+- 사용자 정보 로드 리듀서 정의
+```javascript
+case LOAD_USER_REQUEST: {
+    return {
+        ...state,
+    }
+}
+case LOAD_USER_SUCCESS: {
+    return {
+        ...state,
+        me: action.data,
+    }
+}
+case LOAD_USER_FAILURE: {
+    return {
+        ...state,
+    }
+}
+```
+
+- SAGA 정의
+    - javascript
+```javascript
+function loadUserApi() {
+    return axios.get('/users/', {
+        withCredentials: true,
+    }); // 로그아웃시엔 데이터가 필요없음
+}
+
+function* loadUser () {
+    try {
+        const result = yield call(loadUserApi);
+        yield put({
+            type: LOAD_USER_SUCCESS,
+            data: result.data,
+        })
+    } catch (e){
+        console.error(e);
+        yield put({
+            type: LOAD_USER_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchLoadUser() {
+    yield takeEvery(LOAD_USER_REQUEST, loadUser);
+}
+```

@@ -7,7 +7,6 @@ const dummyUser = {
 };
 
 export const initialState = {
-    isLoggedIn: false, // 로그인여부
     isLoggingOut: false, // 로그아웃 시도중
     isLoggingIn: false, // 로그인 시도중
     loginErrorReason: '', // 로그인실패 이유
@@ -48,6 +47,10 @@ export const REMOVE_FOLLOWER_REQUEST = 'REMOVE_FOLLOWER_REQUEST';
 export const REMOVE_FOLLOWER_SUCCESS = 'REMOVE_FOLLOWER_SUCCESS';
 export const REMOVE_FOLLOWER_FAILURE = 'REMOVE_FOLLOWER_FAILURE';
 
+export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
+export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
+export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
+
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME'; // 중요한 액션, reducer의 단점때문에 어쩔수 없이 만든 액션
 
 const reducer = (state = initialState, action) => {
@@ -62,7 +65,6 @@ const reducer = (state = initialState, action) => {
         case LOG_IN_SUCCESS: {
             return {
                 ...state,
-                isLoggingIn: false,
                 isLoggedIn: true,
                 me: action.data,
                 isLoading: false,
@@ -71,7 +73,6 @@ const reducer = (state = initialState, action) => {
         case LOG_IN_FAILURE: {
             return {
                 ...state,
-                isLoggedIn: false,
                 loginErrorReason: action.error,
                 me: null,
             }
@@ -79,8 +80,20 @@ const reducer = (state = initialState, action) => {
         case LOG_OUT_REQUEST: {
             return {
                 ...state,
-                isLoggedIn: false,
+                isLoggingOut: true,
+            }
+        }
+        case LOG_OUT_SUCCESS: {
+            return {
+                ...state,
                 me: null,
+                isLoggingOut: false,
+            }
+        }
+        case LOG_OUT_FAILURE: {
+            return {
+                ...state,
+                isLoggingOut: false,
             }
         }
         case SIGN_UP_REQUEST: {
@@ -102,6 +115,22 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 isSigningUp: false,
                 signUpErrorReason: action.error // saga에서 넣어준 error가 여기로전달됨.
+            }
+        }
+        case LOAD_USER_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case LOAD_USER_SUCCESS: {
+            return {
+                ...state,
+                me: action.data,
+            }
+        }
+        case LOAD_USER_FAILURE: {
+            return {
+                ...state,
             }
         }
         default: {

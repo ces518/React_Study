@@ -3,9 +3,34 @@ const db = require('../models');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const passport = require('passport');
-// 유저목록 조회
-router.get('/', (req, res) => {
-
+// 내 정보 조회
+router.get('/', async (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).send('로그인이 필요합니다.');
+    }
+    try {
+        const user = req.user;
+        const fullUser = await db.User.findOne({
+            where: { id: user.id },
+            include: [{ // include로 관계를 정의해둔 엔티티까지 가져올 수 있음.
+                model: db.Post, // 엔티티타입
+                as: 'Posts',     // as 알리아스명
+                attributes: ['id'], // 모든 정보를 노출하면 보안상 위협이되기때문에 id속성만 가져온다.
+            }, {
+                model: db.User,
+                as: 'Followings',
+            }, {
+                model: db.User,
+                as: 'Followers',
+                attributes: ['id'],
+            }],
+            attributes: ['id', 'nickname', 'userId']
+        });
+        return res.json(fullUser);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
 });
 
 // 유저 상세조회
