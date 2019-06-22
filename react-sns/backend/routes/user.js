@@ -67,14 +67,28 @@ router.post('/login', (req, res, next) => { // 로그인 전략을 실행해주�
         if (info) {
             return res.status(401).send(info.reason);
         }
-        return req.login(user ,(loginErr) => {
+        return req.login(user , async (loginErr) => {
             if (loginErr) { // 로그인 실패시
                 return next(loginErr);
             }
-            // 로그인 유저정보에는 패스워드가포함되어 있기 때문에 보안상 위험하다.
-            const filteredUser = Object.assign({}, user.toJSON()); // 얕은복사후
-            delete filteredUser.password; // 패스워드 부분삭제
-            return res.json(filteredUser); // 클라이언트로 전송
+            const fullUser = await db.User.findOne({
+                where: { id: user.id },
+                include: [{ // include로 관계를 정의해둔 엔티티까지 가져올 수 있음.
+                    model: db.Post, // 엔티티타입
+                    as: 'Posts',     // as 알리아스명
+                    attributes: ['id'], // 모든 정보를 노출하면 보안상 위협이되기때문에 id속성만 가져온다.
+                }, {
+                    model: db.User,
+                    as: 'Followings',
+                }, {
+                    model: db.User,
+                    as: 'Followers',
+                    attributes: ['id'],
+                }],
+                attributes: ['id', 'nickname', 'userId']
+            });
+            console.log(fullUser);
+            return res.json(fullUser); // 클라이언트로 전송
         });
     })(req, res, next);
 });

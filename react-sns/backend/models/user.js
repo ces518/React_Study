@@ -25,8 +25,8 @@ module.exports = (sequelize, DataTypes) => {
         db.User.hasMany(db.Post, { as: 'Posts' }); // 관계 조합이 같을경우 as 로 구분을 지어줄것.
         db.User.hasMany(db.Comment);
         db.User.belongsToMany(db.Post, { through: 'Like', as: 'Liked' }); // 게시글 좋아요 관계
-        db.User.belongsToMany(db.User, { through: 'Follow', as: 'Followers' }); // 팔로잉, 팔로우 관계
-        db.User.belongsToMany(db.User, { through: 'Follow', as: 'Followings' }); // 본인과의 관계일경우 두번 명시해줘야함.
+        db.User.belongsToMany(db.User, { through: 'Follow', as: 'Followers', foreignKey: 'followerId' }); // 팔로잉, 팔로우 관계
+        db.User.belongsToMany(db.User, { through: 'Follow', as: 'Followings', foreignKey: 'followingId' }); // 본인과의 관계일경우 두번 명시해줘야함.
     };
 
     return User;

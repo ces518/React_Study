@@ -9,13 +9,8 @@ const config = require('../config/config')[env];
 const db = {};
 
 // config.json develop 부분을 불러와서 초기화해준다. (설정 적용)
-let sequelize = new Sequelize(config.database, config.username, config.password, config);
+const sequelize = new Sequelize(config.database, config.username, config.password, config);
 
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
 
 /**
  *  각 엔티티들을 sequelize 와 연결
@@ -25,6 +20,12 @@ db.Hashtag = require('./hashtag')(sequelize, Sequelize);
 db.Image = require('./image')(sequelize, Sequelize);
 db.Post = require('./post')(sequelize, Sequelize);
 db.User = require('./user')(sequelize, Sequelize);
+
+Object.keys(db).forEach(modelName => { // db객체내에 엔티티들을 연결해두어야 db에서 associate함수가 호출이 가능함.
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

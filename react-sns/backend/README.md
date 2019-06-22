@@ -628,3 +628,71 @@ app.use(expressSession({
     name: 'rbck'
 }));
 ```
+
+# include , as foreignKey
+- db 관련 설정 변경
+    - db객체에 엔티티들을 연결해두어야 associate함수 (관계) 를 호출이 가능해짐.
+- 시퀄라이즈를 사용하면 사용자를 조회하면서 내 게시글 을 가져오는등 조인문까지 제어가 가능해짐.
+```javascript
+/**
+ *  각 엔티티들을 sequelize 와 연결
+ */
+db.Comment = require('./comment')(sequelize, Sequelize);
+db.Hashtag = require('./hashtag')(sequelize, Sequelize);
+db.Image = require('./image')(sequelize, Sequelize);
+db.Post = require('./post')(sequelize, Sequelize);
+db.User = require('./user')(sequelize, Sequelize);
+
+Object.keys(db).forEach(modelName => { // db객체내에 엔티티들을 연결해두어야 db에서 associate함수가 호출이 가능함.
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+```
+
+
+- 로그인시 로직 변경
+    - include // 관계를 정의해둔 엔티티정보 까지 가져올수있다.
+    - as // 관계정의시 as 를 사용했다면 해당 as를 명시해주어야한다.
+    - 엔티티를 가져올때 패스워드등 민감한 정보까지 클라이언트로 내보낸다면 보안상 위험하기때문에
+    - 특정 속성만 내보낼때 attributes 속성을 사용한다.
+```javascript
+router.post('/login', (req, res, next) => { // 로그인 전략을 실행해주어야한다.
+    // 로컬전략으로 실행
+    passport.authenticate('local', (err, user, info) => { // passport에서 done으로 넘긴정보를 인자로받음.
+        // err: 서버에러
+        // user: 로그인성공시 유저정보
+        // info: 로직실패 정보
+        if (err) {
+            console.error(err);
+            return next(err);
+        }
+        if (info) {
+            return res.status(401).send(info.reason);
+        }
+        return req.login(user , async (loginErr) => {
+            if (loginErr) { // 로그인 실패시
+                return next(loginErr);
+            }
+            const fullUser = await db.User.findOne({
+                where: { id: user.id },
+                include: [{ // include로 관계를 정의해둔 엔티티까지 가져올 수 있음.
+                    model: db.Post, // 엔티티타입
+                    as: 'Post',     // as 알리아스명
+                    attributes: ['id'], // 모든 정보를 노출하면 보안상 위협이되기때문에 id속성만 가져온다.
+                }, {
+                    model: db.User,
+                    as: 'Followings',
+                }, {
+                    model: db.User,
+                    as: 'Followers',
+                    attributes: ['id'],
+                }],
+                attributes: ['id', 'nickname', 'userId']
+            });
+            console.log(fullUser);
+            return res.json(fullUser); // 클라이언트로 전송
+        });
+    })(req, res, next);
+});
+```
