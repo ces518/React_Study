@@ -783,3 +783,70 @@ function* watchLoadUser() {
     yield takeEvery(LOAD_USER_REQUEST, loadUser);
 }
 ```
+
+# 게시글 작성과 데이터 관계 연결
+- 게시글의 해시태그를 정규식으로 추출한다.
+- 추출한 해시태그가 존재하면 해당 해시태그가 해시태그 테이블에 존재하는지 확인
+    - 해시태그가 존재한다 > 해당 해시태그와 관계연결
+    - 해시태그가 없다 > 새로이 해시태그 등록후 연결
+
+- 시퀄라이즈가 associate 함수를보고 관계함수를 생성해준다.
+    - as 를 보고 관계 함수를 생성해줌.
+    - addComment, setComment, removeComment, getComment 등 .. 
+    - add = 추가
+    - set = 수정
+    - remove = 제거
+    - get = 조회
+    
+- 게시글을 등록하면 해당 게시글의 작성자정보까지 출력해야하기때문에 에러가발생
+    - 해당 게시글의 작성자 정보는 id 값만 저장되어 있기때문에 추가 조회가필요하다.
+    - 방법은 두가지
+        - 1. 새로이 등록한 포스트의 관계함수를 활용하여 유저정보를 가져옴
+        - 2. 등록한 포스트를 새로이 조회 -> 조회할떄 관계 엔티티정보까지 가져온다.
+- routes/post.js
+```javascript
+// 게시글 등록
+router.post('/', async (req, res, next) => {
+    try {
+        const hashTags = req.body.content.match(/#[^\s]+/g);
+        // 보통 정규식으로 해시태그를 뽑아냄
+
+        const newPost = await db.Post.create({
+            content: req.body.content, // 컨텐츠 내용
+            UserId: req.user.id, // 작성자
+        });
+
+        if (hashTags) { // 해시태그가 존재한다면 newPost와 관계를 이어준다.
+            const result = await Promise.all(hashTags.map(tag => db.Hashtag.findOrCreate(
+                {
+                    where: {
+                        name: tag.slice(1).toLowerCase() // 해당 해시태그가 없다면 생성, 있다면 아무일도 하지않음.
+                        // slice(1) : # 제거
+                    },
+            }))); // 저장된 해시태그들이 RESult에 담긴다.
+            console.log(result);
+            await newPost.addHashtags(result.map(r => r[0] )); // post에 해시태그 생성된걸 연결해준다.
+        }
+        // 방법은 두가지
+        // 관계함수를 사용해서 가져온다.
+        //const User = await newPost.getUser();
+        // newPost.User = User;
+        // res.json(newPost);
+
+        // 새롭게 관계엔티티까지 함께 가져옴
+        const fullPost = await db.Post.findOne({
+                where: { id: newPost.id },
+                include: [{
+                    model: db.User,
+                }],
+        });
+        res.json(fullPost);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```
+
+- 불러온 모듈은 공유가됨 (노드에서 캐싱을 함)
+- 보통 공통 설정 부분은 index.js에 몰아둔다

@@ -7,7 +7,7 @@ const Home = () => {
     const dispatch = useDispatch();
     // 전체 state에서 user 를 가져온다.
     // state는 전체를 의미한다.
-    const { isLoggedIn ,user } = useSelector(state => state.user);
+    const { me } = useSelector(state => state.user);
     const { mainPosts } = useSelector(state => state.post);
 
     useEffect(() => {
@@ -29,7 +29,7 @@ const Home = () => {
 
     return (
       <>
-          {isLoggedIn && <PostForm />}
+          {me && <PostForm />}
           {mainPosts.map((c) => {
               return (
                  <PostCard key={c} post={c}/>

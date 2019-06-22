@@ -14,7 +14,7 @@ import {
     LOAD_USER_FAILURE
 } from "../reducers/user";
 import axios from 'axios';
-axios.defaults.baseURL = 'http://localhost:3065/api';
+
 const HELLO_SAGA = 'HELLO_SAGA';
 
 function loginAPI (data) {

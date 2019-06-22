@@ -1,7 +1,7 @@
 export const initialState = {
     mainPosts: [{
         id: 1,
-        user: {
+        User: {
             id: 1,
             nickname: '준영',
         },
@@ -98,7 +98,7 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 isAddingPost: false,
-                mainPosts: [dummyPost, ...state.mainPosts],
+                mainPosts: [action.data, ...state.mainPosts],
                 postAdded: true,
             }
         }

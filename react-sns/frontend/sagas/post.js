@@ -1,11 +1,20 @@
-import { all, fork, takeLatest, delay, put } from 'redux-saga/effects';
-import {ADD_POST_FAILURE, ADD_POST_REQUEST, ADD_POST_SUCCESS, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE, ADD_COMMENT_REQUEST} from "../reducers/post";
+import { all, fork, takeLatest, delay, put, call } from 'redux-saga/effects';
+import { ADD_POST_FAILURE, ADD_POST_REQUEST, ADD_POST_SUCCESS, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE, ADD_COMMENT_REQUEST } from "../reducers/post";
+import axios from 'axios';
 
-function* addPost () {
+
+function addPostAPI(postData) {
+    return axios.post('/posts', postData, { // 로그인한 사용자만 글을 쓸수있다.
+        withCredentials: true,
+    });
+}
+
+function* addPost (action) {
     try {
-        yield delay(2000);
+        const result = yield call(addPostAPI, action.data);
         yield put({
             type: ADD_POST_SUCCESS,
+            data: result.data,
         });
     } catch (e) {
         console.error(e);
