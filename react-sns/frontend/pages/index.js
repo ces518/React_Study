@@ -2,6 +2,7 @@ import React, {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
+import {LOAD_MAIN_POSTS_REQUEST} from "../reducers/post";
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -11,20 +12,9 @@ const Home = () => {
     const { mainPosts } = useSelector(state => state.post);
 
     useEffect(() => {
-        dispatch({
-            type: 'HELLO_SAGA',
+        dispatch({ // 메인포스트 불러오기
+            type: LOAD_MAIN_POSTS_REQUEST,
         });
-
-        dispatch({
-            type: 'HELLO_SAGA',
-        });
-
-        dispatch({
-            type: 'HELLO_SAGA',
-        });
-        // dispatch 3번시 after saga 가 3번찍힌 것을 기대
-        // 하지만 1번만 실행되고 함수가 종료됨.
-        // while true 로 변경시 기대값인 3번이 출력됨.
     }, []);
 
     return (

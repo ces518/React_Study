@@ -850,3 +850,51 @@ router.post('/', async (req, res, next) => {
 
 - 불러온 모듈은 공유가됨 (노드에서 캐싱을 함)
 - 보통 공통 설정 부분은 index.js에 몰아둔다
+
+
+# 게시글 불러오기
+- 메인의 게시글 불러오기
+
+- routes/post.js
+    - 게시글 조회시 작성자 정보도 함께조회한다.
+        - id, nickname만 포함
+    - 오름차순으로 정렬
+        - order: [['createdAt', 'DESC']]
+    - order속성이 2차원배열인 이유 ?
+        - 정렬 조건이 여러개 일수있다.
+```javascript
+// 게시글 목록조회
+router.get('/', async (req, res, next) => {
+    try {
+        const posts = await db.Post.findAll({
+            include:[{
+                model: db.User,
+                attribute: ['id', 'nickname'],
+            }],
+            order: [['createdAt', 'DESC']] // 등록일로 내림차순 정렬
+        }); // 모든 게시글조회
+        return res.json(posts); // 기본적으로는 .toJSON() 을 안붙여도됨
+            // DB객체를 변형할경우 toJSON() 으로 변형해주어야한다.
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```
+
+- 게시글 등록시 trim으로 공백제거를 해줄것.
+    - 스페이스바만 치는 사람이 존재한다.
+```javascript
+const onSubmitForm = useCallback((e) => {
+    e.preventDefault();
+    if (!text || !text.trim()) {
+        return alert('게시글을 작성해주세요.');
+    }
+    dispatch({
+        type: ADD_POST_REQUEST,
+        data: {
+            content: text.trim(),
+        }
+    });
+}, [text]);
+```

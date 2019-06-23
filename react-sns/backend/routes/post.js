@@ -3,8 +3,21 @@ const db = require('../models');
 const router = express.Router();
 
 // 게시글 목록조회
-router.get('/', (req, res) => {
-
+router.get('/', async (req, res, next) => {
+    try {
+        const posts = await db.Post.findAll({
+            include:[{
+                model: db.User,
+                attribute: ['id', 'nickname'],
+            }],
+            order: [['createdAt', 'DESC']] // 등록일로 내림차순 정렬
+        }); // 모든 게시글조회
+        return res.json(posts); // 기본적으로는 .toJSON() 을 안붙여도됨
+            // DB객체를 변형할경우 toJSON() 으로 변형해주어야한다.
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
 });
 
 // 게시글 등록
