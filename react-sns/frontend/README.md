@@ -2196,3 +2196,190 @@ function* watchAddComment () {
 }
 
 ```
+
+
+
+# getInitialProps 로 데이터 받기
+- next에서 전달해주는 getInitialProps를 사용한다
+- context.ctx 를 각페이지의 getInitialProps에서 사용한다.
+- _app.js
+    - context.Component (각 페이지들) 이 getInitialProps가 있을경우 실행시켜주는 역할을 한다.
+```javascript
+ReactBird.getInitialProps = async (context) => {
+  const { ctx } = context;
+  let pageProps = {};
+  if (context.Component.getInitialProps) {
+      pageProps = await context.Component.getInitialProps(ctx);
+  }
+  return { pageProps };
+};
+```
+
+- hashtag.js
+    - 서버에서 전달해준 데이터를 Context에서 가져올수 있음.
+```javascript
+Hashtag.getInitialProps = async (context) => {
+    console.log(context.query.tag); // express가 넘겨준 tag명을 가지고있음
+};
+
+```
+- getInitialProps 도 라이프사이클이다.
+    - Next가 추가해준 라이프사이클이고 가장 최초의작업이다.
+    - 프론트에서도 실행, 서버에서도 실행된다. 
+    - 서버관련 로직넣어도됨
+    - 서버사이드렌더링에 사용된다.
+    - next에서 가장 중요한 라이프사이클
+
+- getIntialProps 에서 컴포넌트의 props로 전달해줄수 있다.
+    - ReactBird의 pageProps로 넘어간다
+    - pageProps를 다시 컴포넌트로 내려준다.
+    
+``javascript
+Hashtag.getInitialProps = async (context) => {
+    console.log(context.query.tag); // express가 넘겨준 tag명을 가지고있음
+    return { tag: context.query.tag };
+};
+```
+
+- _app.js
+```javascript
+
+const ReactBird = ({ Component, store, pageProps }) => {
+  return (
+      <Provider store={store}>
+          <Head>
+              <title>React-SNS</title>
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"/>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js"></script>
+          </Head>
+          <AppLayout>
+            <Component { ...pageProps }/>
+          </AppLayout>
+      </Provider>
+    )
+};
+
+ReactBird.proptypes = { // isRequired 를 붙이면 반드시 존재해야하는 값으로 설정
+  Component: PropTypes.elementType.isRequired, // JSX에 랜더링 할 수 있는 데이터 타입
+    store: PropTypes.object.isRequired,
+    pageProps: PropTypes.object.isRequired,
+};
+
+
+ReactBird.getInitialProps = async (context) => {
+  const { ctx } = context;
+  let pageProps = {};
+  if (context.Component.getInitialProps) {
+      pageProps = await context.Component.getInitialProps(ctx);
+  }
+  return { pageProps };
+};
+```
+
+- 해시태그에 해당하는 게시글들 불러오기
+    - getIntitialProps로 받아온 해시태그로 서버에 해당 해시태그관련 게시글들 조회
+- hastag.js
+```javascript
+import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from "react-redux";
+import {LOAD_HASHTAG_POSTS_REQUEST} from "../reducers/post";
+import PostCard from "../components/PostCard";
+
+const Hashtag = ({ tag }) => {
+    const dispatch = useDispatch();
+    const { mainPosts } = useSelector(state => state.post);
+
+    useEffect(() => {
+        dispatch({
+            type: LOAD_HASHTAG_POSTS_REQUEST,
+            data: tag,
+        });
+    }, []);
+
+    return (
+        <div>
+            {mainPosts.map(c => (
+                <PostCard key={+c.createdAt} post={c}/>
+            ))}
+        </div>
+    )
+};
+
+Hashtag.Proptypes = {
+    tag: PropTypes.string.isRequired,
+}
+
+Hashtag.getInitialProps = async (context) => {
+    console.log(context.query.tag); // express가 넘겨준 tag명을 가지고있음
+    return { tag: context.query.tag };
+};
+
+export default Hashtag;
+
+```
+
+
+- 해당 유저의 프로필과 게시글들 불러오기
+ - getIntitialProps로 받아온 유저 아이디로 서버에 해당 유저 프로필
+ - 해당 유저 게시글 받아오기
+- user.js
+```javascript
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
+import PostCard from '../components/PostCard';
+import PropTypes from 'prop-types';
+import { Avatar, Card } from "antd";
+import {LOAD_USER_REQUEST} from "../reducers/user";
+
+const User = ({ id }) => {
+    const dispatch = useDispatch();
+    const { mainPosts } = useSelector(state => state.post);
+    const { userInfo } = useSelector(state => state.user);
+
+    useEffect(() => {
+        dispatch({
+            type: LOAD_USER_REQUEST,
+            data: id,
+        });
+        dispatch({
+            type: LOAD_USER_POSTS_REQUEST,
+            data: id,
+        });
+    }, []);
+    return (
+        <div>
+            {userInfo
+                ? <Card
+                    actions={[
+                        <div key="twit">짹짹<br/>{userInfo.Posts.length}</div>,
+                        <div key="following">팔로잉<br/>{userInfo.Followings.length}</div>,
+                        <div key="follower">팔로워<br/>{userInfo.Followers.length}</div>
+                    ]}
+                >
+                    <Card.Meta
+                        avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
+                        title={userInfo.nickname}
+                    />
+                </Card>
+                : null}
+            {mainPosts.map(c => (
+                <PostCard key={+c.createdAt} post={c}/>
+            ))}
+        </div>
+    )
+};
+
+User.proptypes = {
+    id: PropTypes.number.isRequired,
+};
+
+
+User.getInitialProps = async (context) => {
+    console.log('user getInitialProps', context.query.id);
+    return { id: parseInt(context.query.id, 10) };
+};
+
+export default User;
+```

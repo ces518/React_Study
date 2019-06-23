@@ -10,7 +10,7 @@ import AppLayout from "../components/AppLayout";
 import reducer from '../reducers';
 import rootSaga from '../sagas/index';
 
-const ReactBird = ({ Component, store }) => {
+const ReactBird = ({ Component, store, pageProps }) => {
   return (
       <Provider store={store}>
           <Head>
@@ -19,7 +19,7 @@ const ReactBird = ({ Component, store }) => {
               <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js"></script>
           </Head>
           <AppLayout>
-            <Component/>
+            <Component { ...pageProps }/>
           </AppLayout>
       </Provider>
     )
@@ -28,6 +28,17 @@ const ReactBird = ({ Component, store }) => {
 ReactBird.proptypes = { // isRequired 를 붙이면 반드시 존재해야하는 값으로 설정
   Component: PropTypes.elementType.isRequired, // JSX에 랜더링 할 수 있는 데이터 타입
     store: PropTypes.object.isRequired,
+    pageProps: PropTypes.object.isRequired,
+};
+
+
+ReactBird.getInitialProps = async (context) => {
+  const { ctx } = context;
+  let pageProps = {};
+  if (context.Component.getInitialProps) {
+      pageProps = await context.Component.getInitialProps(ctx);
+  }
+  return { pageProps };
 };
 
 // 가독성이 안좋은것들은 변수로 따로 분리

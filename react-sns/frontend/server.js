@@ -31,10 +31,17 @@ app.prepare().then(() => {
         }
     }));
 
+    server.get('/hashtag/:tag', (req, res) => { // next가 동적인 파라메터를 처리할수 없기때문에  express로 처리를해주는것
+       return app.render(req, res, '/hashtag', { tag: req.params.tag });
+    });
+
+    server.get('/user/:id', (req, res) => {
+        return app.render(req, res, '/user', { id: req.params.id });
+    });
 
     server.get('*', (req, res) => { // 모든 get요청 처리
         return handle(req, res); // 요청을 next로 넘긴다.
-    });
+    }); // next와 동작이 같기때문에 동적인 요청을 처리할수 없다.
 
     server.listen(3060, () => {
        console.log('next express is running on 3060');
