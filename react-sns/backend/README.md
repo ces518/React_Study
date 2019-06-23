@@ -919,3 +919,79 @@ const onSubmitForm = useCallback((e) => {
     })}</div>} // next 의 Link 태그로 바꾸어주어야함
 />
 ```
+
+- next에서는 동적 url 이 구성이 안됨
+- 프론트서버에도 express연결을 해주어야함
+
+# next, express 연결하기
+- 프론트 패키지에 server.js 생성
+- 의존성 설치
+    - npm i express
+    - npm i morgan
+    - npm i cookie-parser
+    - npm i express-session
+    - npm i nodemon
+    
+```javascript
+const express = require('express');
+const next = require('next');
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const expressSession = require('express-session');
+const dotenv = require('dotenv');
+
+// next 코드
+const dev = process.env.NODE_ENV !== 'production';
+const prod = process.env.NODE_ENV === 'production';
+
+const app = next( { dev });
+const handle = app.getRequestHandler();
+//
+
+dotenv.config();
+
+app.prepare().then(() => {
+    const server = express();
+    server.use(morgan('dev'));
+    server.use(express.json());
+    server.use(express.urlencoded({ extended: true}));
+    server.use(cookieParser(process.env.COOKIE_SECRET));
+    server.use(expressSession({
+        resave: false,
+        saveUninitialized: false,
+        secret: '',
+        cookie: {
+            httpOnly: true,
+            secure: false,
+        }
+    }));
+
+
+    server.get('*', (req, res) => { // 모든 get요청 처리
+        return handle(req, res); // 요청을 next로 넘긴다.
+    });
+
+    server.listen(3060, () => {
+       console.log('next express is running on 3060');
+    });
+});
+```
+
+- nodemon.json 생성
+```javascript
+{
+  "watch": [
+    "serverjs",
+    "nodemon.json"
+  ],
+  "exec": "node server.js",
+  "ext": "js json jsx"
+}
+```
+- .env 생성
+    - COOKIE_SECRET 값 서버와 동일하게 설정
+    
+- package.json
+    - scripts 명령어 변경
+    - dev: nodemon 
+    - 프론트서버도 nodemon을 통해서 expresss + next로 구동함
