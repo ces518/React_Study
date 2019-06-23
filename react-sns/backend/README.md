@@ -898,3 +898,24 @@ const onSubmitForm = useCallback((e) => {
     });
 }, [text]);
 ```
+
+
+# 해시태그 링크로 만들기
+- 게시글 안에 존재하는 해시태그를 next의 Link태그로 변형해주어야함
+- 정규표현식
+    - /(#[^\s]+)/g 으로 정규표현식을 걸면 // '#좋아요', '#구독' 으로 # 이포함
+    - /#[^\s]+/ 으로 정규표현식을 걸면 // #이 미포함이다.
+```javascript
+<Card.Meta
+    avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+    title={post.User.nickname}
+    description={<div>{post.content.split(/(#[^\s]+)/g).map(v => {
+        if (v.match(/#[^\s]+/)) {
+            return (
+                <Link href="/hashtag" key={v}><a>{v}</a></Link>
+            )
+        }
+        return v;
+    })}</div>} // next 의 Link 태그로 바꾸어주어야함
+/>
+```
