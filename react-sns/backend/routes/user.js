@@ -134,8 +134,24 @@ router.delete('/:id/follower', (req, res) => {
 
 });
 // 게시글 가져오기
-router.get('/:id/posts', (req, res) => {
-
+router.get('/:id/posts', async (req, res, next) => {
+    try {
+        console.log(`req.params.id = ${req.params.id}`);
+        const posts = await db.Post.findAll({
+            include: [{
+                model: db.User,
+                where: {
+                    id: req.params.id,
+                },
+                attributes: ['id', 'nickname']
+            }],
+            order: [['createdAt', 'DESC']],
+        });
+        res.json(posts);
+    } catch (e) {
+        console.error(e);
+        next(e);
+    }
 });
 
 module.exports = router;

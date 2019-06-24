@@ -1026,3 +1026,26 @@ router.get('/:tag', async (req, res, next) => {
 
 module.exports = router;
 ```
+
+# user 게시글 조회 라우터
+```javascript
+// 게시글 가져오기
+router.get('/:id/posts', async (req, res, next) => {
+    try {
+        console.log(`req.params.id = ${req.params.id}`);
+        const posts = await db.Post.findAll({
+            include: [{
+                model: db.User,
+                where: {
+                    id: req.params.id,
+                },
+                attributes: ['id', 'nickname']
+            }]
+        });
+        res.json(posts);
+    } catch (e) {
+        console.error(e);
+        next(e);
+    }
+});
+```
