@@ -143,22 +143,30 @@ const reducer = (state = initialState, action) => {
                 commentAdded: false,
             }
         }
+        case LOAD_USER_POSTS_REQUEST:
+        case LOAD_HASHTAG_POSTS_REQUEST:
         case LOAD_MAIN_POSTS_REQUEST: {
             return {
                 ...state,
             }
         }
+        case LOAD_USER_POSTS_SUCCESS:
+        case LOAD_HASHTAG_POSTS_SUCCESS:
         case LOAD_MAIN_POSTS_SUCCESS: {
+            console.log(action.data);
             return {
                 ...state,
                 mainPosts: action.data,
             }
         }
+        case LOAD_USER_POSTS_FAILURE:
+        case LOAD_HASHTAG_POSTS_FAILURE:
         case LOAD_MAIN_POSTS_FAILURE: {
             return {
                 ...state,
             }
         }
+
         default: {
             return {
                 ...state,

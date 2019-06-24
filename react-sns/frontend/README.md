@@ -2383,3 +2383,129 @@ User.getInitialProps = async (context) => {
 
 export default User;
 ```
+
+# 유저 게시글 및 프로필 조회
+- Link 태그를 활용하여 해당 유저의 상세 & 유저가 쓴 게시글 페이지로 이동
+- #문제점 
+    - 눌렀을때 전체가 리프레시 된다.
+    - <Link href={`/user/${post.User.id}`}>
+    - 프론트 주소가아니라 서버의 주소이다.
+    - 프론트에서 처리를 못하기때문에 express로 넘어가고 
+    - 페이지를 새로이 랜더링 되어버린다.
+    - 프론트에서 처리가 가능하게끔 링크를 바꾸어주어야한다.
+    - <Link href={{ pathname: '/hashtag', query: { tag: v.slice(1) } }}
+    - pathname 은 프론트의 패스, query는 서버로전달
+    
+- #새로운 문제점
+    - 리프래시는 되지않지만 쿼리스트링으로 붙는다
+    - /hashtag?tag=구독
+    - as={`/hashtag/${v.slice(1)}`}
+    - URL에 노출되는 주소를 as 속성으로 지정해주면 된다.
+- #결과
+    - <Link href={{ pathname: '/hashtag', query: { tag: v.slice(1) } }} as={`/hashtag/${v.slice(1)}`} key={v}><a>{v}</a></Link>        
+```javascript
+import React, { useState, useCallback, useEffect } from "react";
+import { useSelector, useDispatch, } from "react-redux";
+import { Avatar, Button, Card, Comment, Form, Icon, Input, List } from "antd";
+import PropTypes from 'prop-types';
+import Link from 'next/link';
+import { ADD_COMMENT_REQUEST } from "../reducers/post";
+
+const PostCard = ({ post }) => {
+    const [ commentFormOpened, setCommentFormOpened ] = useState(false);
+    const [ commentText, setCommentText ] = useState('');
+    const { me } = useSelector(state => state.user);
+    const { isAddingComment, commentAdded } = useSelector(state => state.post);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        setCommentText('');
+    }, [commentAdded === true]);
+
+    const onToggleComment = useCallback(() => {
+      setCommentFormOpened(prev => !prev);
+    }, []);
+
+    const onChangeCommentText = useCallback((e) => {
+        setCommentText(e.target.value);
+    }, []);
+
+    const onSubmitComment = useCallback((e) => {
+        e.preventDefault();
+        if (!me) { // 로그인한 사용자만 가능하도록 처리
+            return alert('로그인이 필요합니다.');
+        }
+        return dispatch({
+            type: ADD_COMMENT_REQUEST,
+            data: {
+                postId: post.id,
+            }
+        });
+    }, [me && me.id]); // 객체 말고 기본자료형을 넣어줄것.
+
+    return (
+        <div>
+            <Card
+                key={+post.createdAt}
+                cover={post.img && <img alt="example" src={post.img} />}
+                actions={[
+                    <Icon type="retweet" key="retweet" />,
+                    <Icon type="heart" key="heart" />,
+                    <Icon type="message" key="message" onClick={onToggleComment}/>,
+                    <Icon type="ellipsis" key="ellipsis" />,
+
+                ]}
+                extra={<Button>팔로우</Button>}
+            >
+                <Card.Meta
+                    avatar={<Link href={`/user/${post.User.id}`}><a><Avatar>{post.User.nickname[0]}</Avatar></a></Link>}
+                    title={post.User.nickname}
+                    description={<div>{post.content.split(/(#[^\s]+)/g).map(v => {
+                        if (v.match(/#[^\s]+/)) {
+                            return (
+                                <Link href={`/hashtag/${v.slice(1)}`} key={v}><a>{v}</a></Link>
+                            )
+                        }
+                        return v;
+                    })}</div>} // next 의 Link 태그로 바꾸어주어야함
+                />
+            </Card>
+            { commentFormOpened && (
+                <>
+                    <Form onSubmit={onSubmitComment}>
+                        <Form.Item>
+                            <Input.TextArea rows={4} value={commentText} onChange={onChangeCommentText}/>
+                        </Form.Item>
+                        <Button type="primary" htmlType="submit" loading={isAddingComment}>삐약</Button>
+                    </Form>
+                    <List
+                        header={ `${post.comments ? post.comments.length : 0 } 댓글`}
+                        itemLayout="horizontal"
+                        dataSource={post.comments || []}
+                        renderItem={item => (
+                            <li>
+                                <Comment
+                                    author={item.user.nickname}
+                                    avatar={<Link href={`/user/${item.user.id}`}><a><Avatar>{item.user.nickname[0]}</Avatar></a></Link>}
+                                    content={item.content}
+                                />
+                            </li>
+                        )}
+                    />
+                </>
+            )}
+        </div>
+    )
+};
+
+PostCard.proptypes = {
+    post: PropTypes.shape({
+        User: PropTypes.object,
+        content: PropTypes.string,
+        img: PropTypes.string,
+        createdAt: PropTypes.object,
+    }),
+};
+
+export default PostCard;
+```

@@ -11,7 +11,7 @@ import {
     LOG_OUT_FAILURE,
     LOAD_USER_REQUEST,
     LOAD_USER_SUCCESS,
-    LOAD_USER_FAILURE
+    LOAD_USER_FAILURE, LOAD_USER_INFO_REQUEST, LOAD_USER_INFO_SUCCESS, LOAD_USER_INFO_FAILURE
 } from "../reducers/user";
 import axios from 'axios';
 
@@ -154,6 +154,31 @@ function* watchLoadUser() {
     yield takeEvery(LOAD_USER_REQUEST, loadUser);
 }
 
+
+function loadUserInfoApi(id) {
+    return axios.get(`/users/${id}`);
+}
+
+function* loadUserInfo (action) {
+    try {
+        const result = yield call(loadUserInfoApi, action.data);
+        yield put({
+            type: LOAD_USER_INFO_SUCCESS,
+            data: result.data,
+        })
+    } catch (e){
+        console.error(e);
+        yield put({
+            type: LOAD_USER_INFO_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchLoadUserInfo() {
+    yield takeEvery(LOAD_USER_INFO_REQUEST, loadUserInfo);
+}
+
 export default function* userSaga() {
     // yield all([
     //     fork(watchLogin),
@@ -167,6 +192,7 @@ export default function* userSaga() {
         fork(watchLogin),
         fork(watchLogout),
         fork(watchLoadUser),
+        fork(watchLoadUserInfo),
         fork(watchSignUp),
     ]);
 };

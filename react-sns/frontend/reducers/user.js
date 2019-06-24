@@ -51,6 +51,10 @@ export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
 export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
 export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
 
+export const LOAD_USER_INFO_REQUEST = 'LOAD_USER_INFO_REQUEST';
+export const LOAD_USER_INFO_SUCCESS = 'LOAD_USER_INFO_SUCCESS';
+export const LOAD_USER_INFO_FAILURE = 'LOAD_USER_INFO_FAILURE';
+
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME'; // 중요한 액션, reducer의 단점때문에 어쩔수 없이 만든 액션
 
 const reducer = (state = initialState, action) => {
@@ -68,6 +72,7 @@ const reducer = (state = initialState, action) => {
                 isLoggedIn: true,
                 me: action.data,
                 isLoading: false,
+                isLoggingIn: false,
             }
         }
         case LOG_IN_FAILURE: {
@@ -75,6 +80,7 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 loginErrorReason: action.error,
                 me: null,
+                isLoggingIn: false,
             }
         }
         case LOG_OUT_REQUEST: {
@@ -129,6 +135,22 @@ const reducer = (state = initialState, action) => {
             }
         }
         case LOAD_USER_FAILURE: {
+            return {
+                ...state,
+            }
+        }
+        case LOAD_USER_INFO_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case LOAD_USER_INFO_SUCCESS: {
+            return {
+                ...state,
+                userInfo: action.data,
+            }
+        }
+        case LOAD_USER_INFO_FAILURE: {
             return {
                 ...state,
             }

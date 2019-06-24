@@ -4,7 +4,7 @@ import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
 import PostCard from '../components/PostCard';
 import PropTypes from 'prop-types';
 import { Avatar, Card } from "antd";
-import {LOAD_USER_REQUEST} from "../reducers/user";
+import {LOAD_USER_INFO_REQUEST} from "../reducers/user";
 
 const User = ({ id }) => {
     const dispatch = useDispatch();
@@ -13,7 +13,7 @@ const User = ({ id }) => {
 
     useEffect(() => {
         dispatch({
-            type: LOAD_USER_REQUEST,
+            type: LOAD_USER_INFO_REQUEST,
             data: id,
         });
         dispatch({
@@ -26,9 +26,9 @@ const User = ({ id }) => {
             {userInfo
                 ? <Card
                     actions={[
-                        <div key="twit">짹짹<br/>{userInfo.Posts.length}</div>,
-                        <div key="following">팔로잉<br/>{userInfo.Followings.length}</div>,
-                        <div key="follower">팔로워<br/>{userInfo.Followers.length}</div>
+                        <div key="twit">짹짹<br/>{userInfo.Posts}</div>,
+                        <div key="following">팔로잉<br/>{userInfo.Followings}</div>,
+                        <div key="follower">팔로워<br/>{userInfo.Followers}</div>
                     ]}
                 >
                     <Card.Meta
