@@ -995,3 +995,34 @@ app.prepare().then(() => {
     - scripts 명령어 변경
     - dev: nodemon 
     - 프론트서버도 nodemon을 통해서 expresss + next로 구동함
+
+
+# hashtag 라우터 
+- 한글, 특수문자의 경우에는 URIComponent로 처리되어 넘어오기때문에
+- 서버쪽에서 정상적으로 처리하려면 디코딩 작업이필요하다.
+
+- join된 엔티티의 조건으로 검색을 하는경우 include내의 where절로 검색을 해야한다.
+```javascript
+const express = require('express');
+const db = require('../models');
+const router = express.Router();
+
+router.get('/:tag', async (req, res, next) => {
+    try {
+        const posts = db.Post.findAll({
+            include: [{
+                model: db.Hashtag,
+                where: {
+                    name: decodeURIComponent(req.params.name), // 한글, 특수문자는 URIComponent 로 변형되서넘어오기때문에 처리가필요
+                },
+            }],
+        });
+        res.json(posts);
+    } catch (e) {
+        console.error(e);
+        next(e);
+    }
+});
+
+module.exports = router;
+```
