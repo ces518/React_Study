@@ -55,7 +55,7 @@ router.get('/:id', async (req, res, next) => { // :id 은 파라메터를 의미
             attributes: ['id', 'nickname'],
         });
         const jsonUser = user.toJSON();
-        jsonUser.Posts = jsonUser.Posts ? jsonUser.length : 0;
+        jsonUser.Posts = jsonUser.Posts ? jsonUser.Posts.length : 0;
         jsonUser.Followings = jsonUser.Followings ? jsonUser.Followings.length : 0;
         jsonUser.Followers = jsonUser.Followers ? jsonUser.Followers.length : 0;
         res.json(jsonUser);
