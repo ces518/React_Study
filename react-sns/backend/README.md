@@ -1049,3 +1049,38 @@ router.get('/:id/posts', async (req, res, next) => {
     }
 });
 ```
+
+# user 상세조회 라우터
+```javascript
+// 유저 상세조회
+router.get('/:id', async (req, res, next) => { // :id 은 파라메터를 의미한다. pathvariable개념
+    try {
+        console.log(`req.params.id = ${req.params.id}`);
+        const user = await db.User.findOne({
+            where: { id: parseInt(req.params.id, 10)},
+            include: [{
+                model: db.Post,
+                as: 'Posts',
+                attributes: ['id'],
+            }, {
+                model: db.User,
+                as: 'Followings',
+                attributes: ['id'],
+            }, {
+                model: db.User,
+                as: 'Followers',
+                attributes: ['id'],
+            }],
+            attributes: ['id', 'nickname'],
+        });
+        const jsonUser = user.toJSON();
+        jsonUser.Posts = jsonUser.Posts ? jsonUser.length : 0;
+        jsonUser.Followings = jsonUser.Followings ? jsonUser.Followings.length : 0;
+        jsonUser.Followers = jsonUser.Followers ? jsonUser.Followers.length : 0;
+        res.json(jsonUser);
+    } catch (e) {
+        console.error(e);
+        next(e);
+    }
+});
+```
