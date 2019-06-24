@@ -10,6 +10,7 @@ const db = require('./models');
 const app = express();
 const userAPIRouter = require('./routes/user');
 const postAPIRouter = require('./routes/post');
+const hashtagAPIRouter = require('./routes/hashtag');
 db.sequelize.sync(); // 테이블 생성
 
 dotenv.config();
@@ -45,6 +46,7 @@ app.use(passport.session());
 
 app.use('/api/users', userAPIRouter);
 app.use('/api/posts', postAPIRouter);
+app.use('/api/hashtag', hashtagAPIRouter);
 
 // 3065 포트로 서버 기동
 app.listen(3065, () => {
