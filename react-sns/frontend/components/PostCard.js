@@ -3,7 +3,7 @@ import { useSelector, useDispatch, } from "react-redux";
 import { Avatar, Button, Card, Comment, Form, Icon, Input, List } from "antd";
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import { ADD_COMMENT_REQUEST } from "../reducers/post";
+import { ADD_COMMENT_REQUEST, LOAD_COMMENTS_REQUEST } from "../reducers/post";
 
 const PostCard = ({ post }) => {
     const [ commentFormOpened, setCommentFormOpened ] = useState(false);
@@ -18,7 +18,13 @@ const PostCard = ({ post }) => {
 
     const onToggleComment = useCallback(() => {
       setCommentFormOpened(prev => !prev);
-    }, []);
+      if (!commentFormOpened) {
+          dispatch({
+              type: LOAD_COMMENTS_REQUEST,
+              data: post.id,
+          });
+      }
+    }, [post.id]);
 
     const onChangeCommentText = useCallback((e) => {
         setCommentText(e.target.value);
@@ -33,9 +39,10 @@ const PostCard = ({ post }) => {
             type: ADD_COMMENT_REQUEST,
             data: {
                 postId: post.id,
+                content: commentText,
             }
         });
-    }, [me && me.id]); // 객체 말고 기본자료형을 넣어줄것.
+    }, [me && me.id, commentText]); // 객체 말고 기본자료형을 넣어줄것.
 
     return (
         <div>
@@ -79,8 +86,8 @@ const PostCard = ({ post }) => {
                         renderItem={item => (
                             <li>
                                 <Comment
-                                    author={item.user.nickname}
-                                    avatar={<Link href={{ pathname: '/user', query: { id: item.user.id } }} as={`/user/${item.user.id}`}><a><Avatar>{item.user.nickname[0]}</Avatar></a></Link>}
+                                    author={item.User.nickname}
+                                    avatar={<Link href={{ pathname: '/user', query: { id: item.User.id } }} as={`/user/${item.User.id}`}><a><Avatar>{item.User.nickname[0]}</Avatar></a></Link>}
                                     content={item.content}
                                 />
                             </li>

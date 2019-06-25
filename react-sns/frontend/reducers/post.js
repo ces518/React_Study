@@ -124,7 +124,7 @@ const reducer = (state = initialState, action) => {
             * */
             const postIndex = state.mainPosts.findIndex(v => v.id === action.data.postId);
             const post = state.mainPosts[postIndex];
-            const comments = [...post.comments, dummyComment];
+            const comments = [...post.comments, action.data.comment];
             const mainPosts = [...state.mainPosts];
             mainPosts[postIndex] = {...post, comments};
 
@@ -143,6 +143,19 @@ const reducer = (state = initialState, action) => {
                 commentAdded: false,
             }
         }
+        case LOAD_COMMENTS_SUCCESS: {
+            const postIndex = state.mainPosts.findIndex(v => v.id === action.data.postId);
+            const post = state.mainPosts[postIndex];
+            const comments = action.data.comments;
+            const mainPosts = [...state.mainPosts];
+            mainPosts[postIndex] = {...post, comments};
+
+            return {
+                ...state,
+                mainPosts,
+            }
+        }
+        case LOAD_COMMENTS_REQUEST:
         case LOAD_USER_POSTS_REQUEST:
         case LOAD_HASHTAG_POSTS_REQUEST:
         case LOAD_MAIN_POSTS_REQUEST: {
@@ -159,6 +172,7 @@ const reducer = (state = initialState, action) => {
                 mainPosts: action.data,
             }
         }
+        case LOAD_COMMENTS_FAILURE:
         case LOAD_USER_POSTS_FAILURE:
         case LOAD_HASHTAG_POSTS_FAILURE:
         case LOAD_MAIN_POSTS_FAILURE: {

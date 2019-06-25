@@ -14,11 +14,11 @@ import {
     LOAD_HASHTAG_POSTS_FAILURE,
     LOAD_USER_POSTS_REQUEST,
     LOAD_USER_POSTS_SUCCESS,
-    LOAD_USER_POSTS_FAILURE
+    LOAD_USER_POSTS_FAILURE, LOAD_COMMENTS_SUCCESS, LOAD_COMMENTS_FAILURE, LOAD_COMMENTS_REQUEST
 } from "../reducers/post";
 import axios from 'axios';
 
-
+/////////// addPost
 function addPostAPI(postData) {
     return axios.post('/posts', postData, { // 로그인한 사용자만 글을 쓸수있다.
         withCredentials: true,
@@ -44,15 +44,24 @@ function* addPost (action) {
 function* watchAddPost () {
     yield takeLatest(ADD_POST_REQUEST, addPost);
 }
+////////////
+
+//////////// addComment
+function addCommentAPI (data) {
+    return axios.post(`/posts/${data.postId}/comments`, { content: data.content }, {
+        withCredentials: true,
+    });
+}
 
 function* addComment (action) {
     // REQUEST action을 받을 수 있다.
     try {
-        yield delay(2000);
+        const result = yield call(addCommentAPI, action.data);
         yield put({
             type: ADD_COMMENT_SUCCESS,
             data: {
                 postId: action.data.postId,
+                comment: result.data,
             }
         });
     } catch (e) {
@@ -67,7 +76,39 @@ function* addComment (action) {
 function* watchAddComment () {
     yield takeLatest(ADD_COMMENT_REQUEST, addComment);
 }
+////////////
 
+//////////// loadComment
+function loadCommentsAPI (postId) {
+    return axios.get(`/posts/${postId}/comments`);
+}
+
+function* loadComments (action) {
+    // REQUEST action을 받을 수 있다.
+    try {
+        const result = yield call(loadCommentsAPI, action.data);
+        yield put({
+            type: LOAD_COMMENTS_SUCCESS,
+            data: {
+                postId: action.data,
+                comments: result.data,
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        yield put({
+            type: LOAD_COMMENTS_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchLoadComments () {
+    yield takeLatest(LOAD_COMMENTS_REQUEST, loadComments);
+}
+////////////
+
+//////////// loadMainPosts
 function loadMainPostsAPI() {
     return axios.get('/posts');
 }
@@ -91,7 +132,9 @@ function* loadMainPosts () {
 function* watchLoadMainPosts () {
     yield takeLatest(LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
 }
+////////////
 
+//////////// loadHashtagPosts
 function loadHashtagPostsAPI(tag) {
     return axios.get(`/hashtag/${tag}`);
 }
@@ -115,7 +158,9 @@ function* loadHashtagPosts(action) {
 function* watchLoadHashtagPosts () {
     yield takeLatest(LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
 }
+////////////////
 
+//////////////// loadUserPosts
 function loadUserPostsAPI(id) {
     return axios.get(`/users/${id}/posts`);
 }
@@ -139,6 +184,7 @@ function* loadUserPosts(action) {
 function* watchLoadUserPosts () {
     yield takeLatest(LOAD_USER_POSTS_REQUEST, loadUserPosts);
 }
+/////////////////////
 
 export default function* postSaga() {
     yield all([
@@ -147,5 +193,6 @@ export default function* postSaga() {
         fork(watchLoadMainPosts),
         fork(watchAddPost),
         fork(watchAddComment),
+        fork(watchLoadComments)
     ]);
 };
