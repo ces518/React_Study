@@ -14,7 +14,13 @@ import {
     LOAD_HASHTAG_POSTS_FAILURE,
     LOAD_USER_POSTS_REQUEST,
     LOAD_USER_POSTS_SUCCESS,
-    LOAD_USER_POSTS_FAILURE, LOAD_COMMENTS_SUCCESS, LOAD_COMMENTS_FAILURE, LOAD_COMMENTS_REQUEST
+    LOAD_USER_POSTS_FAILURE,
+    LOAD_COMMENTS_SUCCESS,
+    LOAD_COMMENTS_FAILURE,
+    LOAD_COMMENTS_REQUEST,
+    UPLOAD_IMAGES_REQUEST,
+    UPLOAD_IMAGES_SUCCESS,
+    UPLOAD_IMAGES_FAILURE
 } from "../reducers/post";
 import axios from 'axios';
 
@@ -186,6 +192,33 @@ function* watchLoadUserPosts () {
 }
 /////////////////////
 
+///////////////////// imageUpload
+function uploadImagesAPI(formData) {
+    return axios.post('/posts/images', formData, {
+        withCredentials: true,
+    });
+}
+
+function* uploadImages(action) {
+    try {
+        const result = yield call(uploadImagesAPI, action.data);
+        yield put({
+            type: UPLOAD_IMAGES_SUCCESS,
+            data: result.data, // 서버에 저장된 이미지 주소들을 받음.
+        });
+    } catch (e) {
+        console.error(e);
+        yield put({
+            type: UPLOAD_IMAGES_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchUploadImages () {
+    yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
+}
+
 export default function* postSaga() {
     yield all([
         fork(watchLoadUserPosts),
@@ -193,6 +226,7 @@ export default function* postSaga() {
         fork(watchLoadMainPosts),
         fork(watchAddPost),
         fork(watchAddComment),
-        fork(watchLoadComments)
+        fork(watchLoadComments),
+        fork(watchUploadImages)
     ]);
 };

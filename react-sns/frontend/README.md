@@ -2509,3 +2509,7 @@ PostCard.proptypes = {
 
 export default PostCard;
 ```
+
+# 이미지 업로드 프론트 구현
+- multipart/form-data
+- 이미지와 게시글을 보통 분리해서 업로드한다.
