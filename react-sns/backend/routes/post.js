@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../models');
 const router = express.Router();
+const { isLoggedIn } = require('./middleware');
 
 // 게시글 목록조회
 router.get('/', async (req, res, next) => {
@@ -21,7 +22,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // 게시글 등록
-router.post('/', async (req, res, next) => {
+router.post('/', isLoggedIn, async (req, res, next) => {
     try {
         const hashTags = req.body.content.match(/#[^\s]+/g);
         // 보통 정규식으로 해시태그를 뽑아냄
@@ -94,11 +95,8 @@ router.get('/:id/comments', async (req, res, next) => {
 
 
 // 댓글 등록
-router.post('/:id/comments', async (req, res, next) => {
+router.post('/:id/comments', isLoggedIn, async (req, res, next) => {
     try {
-        if (!req.user) {
-            return res.status(401).send('로그인이 필요합니다.');
-        }
         const post = await db.Post.findOne({ where: { id: req.params.id } }); // 포스트가 존재하는지 검증
         if (!post) {
             return res.status(404).send('포스트가 존재하지않습니다.');

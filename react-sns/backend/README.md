@@ -1149,3 +1149,27 @@ router.post('/:id/comment', async (req, res, next) => {
     }
 });
 ```
+
+# 미들웨어로 중복 제거
+- 로그인검사 등 중복코드들을 제거해야함
+- express 미들웨어를 사용한다.
+- 에러처리 미들웨어는 express가 기본제공
+
+- 공통로직을 middleware로 작성
+- middleware.js
+```javascript
+exports.isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) { // passport에서 제공하는 함수 로그인여부 판단
+      next();
+  } else {
+      res.status(401).send('로그인이 필요합니다.');
+  }
+};
+```
+
+- middleware를 불러와서 사용
+- routes/post.js
+```javascript
+const { isLoggedIn } = require('./middleware');
+router.post('/:id/comments', isLoggedIn, async (req, res, next) => {... });
+```

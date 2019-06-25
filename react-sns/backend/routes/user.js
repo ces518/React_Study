@@ -3,11 +3,10 @@ const db = require('../models');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const passport = require('passport');
+const { isLoggedIn } = require('./middleware');
+
 // 내 정보 조회
-router.get('/', async (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).send('로그인이 필요합니다.');
-    }
+router.get('/', isLoggedIn, async (req, res, next) => {
     try {
         const user = req.user;
         const fullUser = await db.User.findOne({
@@ -36,7 +35,6 @@ router.get('/', async (req, res, next) => {
 // 유저 상세조회
 router.get('/:id', async (req, res, next) => { // :id 은 파라메터를 의미한다. pathvariable개념
     try {
-        console.log(`req.params.id = ${req.params.id}`);
         const user = await db.User.findOne({
             where: { id: parseInt(req.params.id, 10)},
             include: [{
@@ -163,7 +161,6 @@ router.delete('/:id/follower', (req, res) => {
 // 게시글 가져오기
 router.get('/:id/posts', async (req, res, next) => {
     try {
-        console.log(`req.params.id = ${req.params.id}`);
         const posts = await db.Post.findAll({
             include: [{
                 model: db.User,
