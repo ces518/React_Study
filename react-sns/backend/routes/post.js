@@ -67,5 +67,63 @@ router.post('/images', (req, res) => {
 
 });
 
+// 댓글 조회
+router.get('/:id/comments', async (req, res, next) => {
+    try {
+        const post = await db.Post.findOne({ where: { id: req.params.id } });
+        if (!post) {
+            return res.status(404).send('포스트가 존재하지않습니다.');
+        }
+        const comments = await db.Comment.findAll({
+           where: {
+               PostId: req.params.id,
+           },
+           order: [['createdAt', 'DESC']],
+           include: [{
+               model: db.User,
+               attributes: ['id', 'nickname']
+           }],
+        });
+        console.log(comments);
+        return res.json(comments);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+
+// 댓글 등록
+router.post('/:id/comments', async (req, res, next) => {
+    try {
+        if (!req.user) {
+            return res.status(401).send('로그인이 필요합니다.');
+        }
+        const post = await db.Post.findOne({ where: { id: req.params.id } }); // 포스트가 존재하는지 검증
+        if (!post) {
+            return res.status(404).send('포스트가 존재하지않습니다.');
+        }
+        const newComment = await db.Comment.create({
+            PostId: post.id,
+            UserId: req.user.id,
+            content: req.body.content,
+        });
+
+        await post.addComment(newComment.id); // 시퀄라이즈에서 제공하는 post와 comment간의 관계 정의
+        const comment = await db.Comment.findOne({ // 등록된 댓글 조회해서 전달
+            where: {
+                id: newComment.id,
+            },
+            include: [{
+                model: db.User,
+                attributes: ['id', 'nickname'],
+            }],
+        });
+        return res.json(comment);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
 
 module.exports = router;
