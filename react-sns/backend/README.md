@@ -1173,3 +1173,39 @@ exports.isLoggedIn = (req, res, next) => {
 const { isLoggedIn } = require('./middleware');
 router.post('/:id/comments', isLoggedIn, async (req, res, next) => {... });
 ```
+
+
+# multer 미들웨어로 업로드처리하기
+- multipart 데이터는 bodyParser로는 처리가 할수없다
+- multer 미들웨어 사용
+
+- 별도의 multer 설정이 필요하다
+    - storage: 저장소 설정이며 추후에 S3스토리지등에 업로드가 가능하다.
+    - filename: 저장시 파일명
+    - limists: 파일사이즈, 개수등 제한 
+```javascript
+// multer 설정
+const upload = multer({
+    storage: multer.diskStorage({ // 파일 스토리지 지정 옵션, 추후에 S3 스토리지 등 으로 변경이가능함.
+        destination(req, file, done) {
+            done(null, 'uploads') // cb는
+        },
+        filename(req, file, done) { // 실제 저장파일명을 변경해줌
+            const ext = path.extname(file.originalname);
+            const basename = path.basename(file.originalname, ext);
+            done(null, basename + new Date().valueOf() + ext);
+        }
+    }),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 파일사이즈 설정. 파일개수제한도 가능하다.
+});
+
+// 이미지 등록
+// upload.array('name')이 폼에서 넘기는 명을 지정해준다.
+// 단일일경우 single
+// upload.files([{ name: 'test1'}, { name: 'test2' } ])// 각 이미지를넘길때 폼이넘기는 이름이 각각 다른경우
+router.post('/images', isLoggedIn, upload.array('image'), (req, res) => {
+    //req.file // 단일파일
+    console.log('이미지 업로드');
+    res.json(req.files.map(v => v.filename)); // 업로드된 이미지를 프론트로 돌려준다.
+});
+```

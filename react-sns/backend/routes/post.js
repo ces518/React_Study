@@ -1,6 +1,8 @@
 const express = require('express');
 const db = require('../models');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const { isLoggedIn } = require('./middleware');
 
 // 게시글 목록조회
@@ -63,9 +65,29 @@ router.post('/', isLoggedIn, async (req, res, next) => {
     }
 });
 
-// 이미지 등록
-router.post('/images', (req, res) => {
+// multer 설정
+const upload = multer({
+    storage: multer.diskStorage({ // 파일 스토리지 지정 옵션, 추후에 S3 스토리지 등 으로 변경이가능함.
+        destination(req, file, done) {
+            done(null, 'uploads') // cb는
+        },
+        filename(req, file, done) { // 실제 저장파일명을 변경해줌
+            const ext = path.extname(file.originalname);
+            const basename = path.basename(file.originalname, ext);
+            done(null, basename + new Date().valueOf() + ext);
+        }
+    }),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 파일사이즈 설정. 파일개수제한도 가능하다.
+});
 
+// 이미지 등록
+// upload.array('name')이 폼에서 넘기는 명을 지정해준다.
+// 단일일경우 single
+// upload.files([{ name: 'test1'}, { name: 'test2' } ])// 각 이미지를넘길때 폼이넘기는 이름이 각각 다른경우
+router.post('/images', isLoggedIn, upload.array('image'), (req, res) => {
+    //req.file // 단일파일
+    console.log('이미지 업로드');
+    res.json(req.files.map(v => v.filename)); // 업로드된 이미지를 프론트로 돌려준다.
 });
 
 // 댓글 조회
