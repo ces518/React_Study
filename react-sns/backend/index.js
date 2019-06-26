@@ -39,6 +39,7 @@ app.use(expressSession({
 }));
 // 요청에 대한 로깅
 app.use(morgan('dev'));
+app.use('/', express.static('uploads')); // 경로를 지정해주면 다른서버에서 접근이 가능하다.
 
 // passport 세션은 expressSession을 사용하기때문에 expressSession 활성화 이후에 활성화해주어야한다.
 app.use(passport.initialize());

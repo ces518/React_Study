@@ -1209,3 +1209,11 @@ router.post('/images', isLoggedIn, upload.array('image'), (req, res) => {
     res.json(req.files.map(v => v.filename)); // 업로드된 이미지를 프론트로 돌려준다.
 });
 ```
+
+# 파일미리보기
+- express.static 을 사용하여 다른서버에서 접근이 가능하도록 설정해준다
+
+- index.js
+```javascript
+app.use('/', express.static('uploads')); // 경로를 지정해주면 다른서버에서 접근이 가능하다.
+```
