@@ -2513,3 +2513,24 @@ export default PostCard;
 # 이미지 업로드 프론트 구현
 - multipart/form-data
 - 이미지와 게시글을 보통 분리해서 업로드한다.
+
+
+# 이미지 미리보기 삭제 구현
+- 이미지 미리보기 삭제의 경우에는 비동기 처리가 필요없다.
+- 따라서 REMOVE_IMAGE 액션 하나만 정의해서 사용한다
+
+- removeImage 함수 정의 
+    - 하나의 패턴으로 생각
+    - onRemoveImage() 와 같이 () 가 생길때마다 핸들러 함수에 () 가 증가
+    - 고차함수 이다.
+    - 기존 함수를 확장하는것.
+```javascript
+    const onRemoveImage = useCallback(index => () => { // 고차함수로 기존함수를 확장하는것.
+        dispatch({
+            type: REMOVE_IMAGE,
+            data: index,
+        });
+    }, []);
+
+<Button onClick={onRemoveImage(i)}>제거</Button>
+```

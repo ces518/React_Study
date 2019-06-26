@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { Form, Input, Button } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
-import {ADD_POST_REQUEST, UPLOAD_IMAGES_REQUEST} from "../reducers/post";
+import {ADD_POST_REQUEST, REMOVE_IMAGE, UPLOAD_IMAGES_REQUEST} from "../reducers/post";
 
 const PostForm = () => {
     const { imagePaths, isAddingPost, postAdded } = useSelector(state => state.post);
@@ -46,6 +46,13 @@ const PostForm = () => {
     const onClickImageUpload = useCallback(() => {
         imageInput.current.click();
     }, []);
+
+    const onRemoveImage = useCallback(index => () => { // 고차함수로 기존함수를 확장하는것.
+        dispatch({
+            type: REMOVE_IMAGE,
+            data: index,
+        });
+    }, []);
     return (
       <Form style={{ margin: '10px 0 20px' }} encType="multipart/form-data" onSubmit={onSubmitForm}>
           <Input.TextArea maxLength={140} placeholder="어떤 신기한 일이 있었나요?" value={text} onChange={onChangeText}/>
@@ -60,7 +67,7 @@ const PostForm = () => {
                       <div key={v} style={{ display: 'inline-block' }}>
                           <img src={'http://localhost:3065/' + v} style={{ width: '200px' }} alt={v}/>
                           <div>
-                              <Button>제거</Button>
+                              <Button onClick={onRemoveImage(i)}>제거</Button>
                           </div>
                       </div>
                   )
