@@ -5,6 +5,22 @@ const multer = require('multer');
 const path = require('path');
 const { isLoggedIn } = require('./middleware');
 
+
+// multer 설정
+const upload = multer({
+    storage: multer.diskStorage({ // 파일 스토리지 지정 옵션, 추후에 S3 스토리지 등 으로 변경이가능함.
+        destination(req, file, done) {
+            done(null, 'uploads') // cb는
+        },
+        filename(req, file, done) { // 실제 저장파일명을 변경해줌
+            const ext = path.extname(file.originalname);
+            const basename = path.basename(file.originalname, ext);
+            done(null, basename + new Date().valueOf() + ext);
+        }
+    }),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 파일사이즈 설정. 파일개수제한도 가능하다.
+});
+
 // 게시글 목록조회
 router.get('/', async (req, res, next) => {
     try {
@@ -12,6 +28,8 @@ router.get('/', async (req, res, next) => {
             include:[{
                 model: db.User,
                 attribute: ['id', 'nickname'],
+            }, {
+                model: db.Image,
             }],
             order: [['createdAt', 'DESC']] // 등록일로 내림차순 정렬
         }); // 모든 게시글조회
@@ -24,7 +42,9 @@ router.get('/', async (req, res, next) => {
 });
 
 // 게시글 등록
-router.post('/', isLoggedIn, async (req, res, next) => {
+// upload.none() 을 사용하면
+// 이미지는 req.files, 텍스트는 req.body 로 보내준다.
+router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     try {
         const hashTags = req.body.content.match(/#[^\s]+/g);
         // 보통 정규식으로 해시태그를 뽑아냄
@@ -45,6 +65,24 @@ router.post('/', isLoggedIn, async (req, res, next) => {
             console.log(result);
             await newPost.addHashtags(result.map(r => r[0] )); // post에 해시태그 생성된걸 연결해준다.
         }
+
+
+        // multer의 단점
+        // 단수와 다수를 구분해주어야함
+        // 이미지 다수: 배열
+        // 이미지 단수: 배열X
+        if (req.body.image) { // 이미지가 있는경우
+            if (Array.isArray(req.body.image)) { // 다수인경우
+                const images = await Promise.all(req.body.image.map((image) => { // Promise.all 로 묶어주면 한번에 처리됨.
+                    return db.Image.create({ src: image });
+                }));
+                await newPost.addImages(images);
+            } else {
+                const image = await db.Image.create({ src: req.body.image });
+                await newPost.addImage(image);
+            }
+        }
+
         // 방법은 두가지
         // 관계함수를 사용해서 가져온다.
         //const User = await newPost.getUser();
@@ -56,6 +94,8 @@ router.post('/', isLoggedIn, async (req, res, next) => {
                 where: { id: newPost.id },
                 include: [{
                     model: db.User,
+                }, {
+                    model: db.Image,
                 }],
         });
         res.json(fullPost);
@@ -65,20 +105,6 @@ router.post('/', isLoggedIn, async (req, res, next) => {
     }
 });
 
-// multer 설정
-const upload = multer({
-    storage: multer.diskStorage({ // 파일 스토리지 지정 옵션, 추후에 S3 스토리지 등 으로 변경이가능함.
-        destination(req, file, done) {
-            done(null, 'uploads') // cb는
-        },
-        filename(req, file, done) { // 실제 저장파일명을 변경해줌
-            const ext = path.extname(file.originalname);
-            const basename = path.basename(file.originalname, ext);
-            done(null, basename + new Date().valueOf() + ext);
-        }
-    }),
-    limits: { fileSize: 20 * 1024 * 1024 }, // 파일사이즈 설정. 파일개수제한도 가능하다.
-});
 
 // 이미지 등록
 // upload.array('name')이 폼에서 넘기는 명을 지정해준다.

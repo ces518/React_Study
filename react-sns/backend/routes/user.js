@@ -168,6 +168,8 @@ router.get('/:id/posts', async (req, res, next) => {
                     id: req.params.id,
                 },
                 attributes: ['id', 'nickname']
+            }, {
+                model: db.Image,
             }],
             order: [['createdAt', 'DESC']],
         });
