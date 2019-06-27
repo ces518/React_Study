@@ -11,7 +11,16 @@ import {
     LOG_OUT_FAILURE,
     LOAD_USER_REQUEST,
     LOAD_USER_SUCCESS,
-    LOAD_USER_FAILURE, LOAD_USER_INFO_REQUEST, LOAD_USER_INFO_SUCCESS, LOAD_USER_INFO_FAILURE
+    LOAD_USER_FAILURE,
+    LOAD_USER_INFO_REQUEST,
+    LOAD_USER_INFO_SUCCESS,
+    LOAD_USER_INFO_FAILURE,
+    FOLLOW_USER_REQUEST,
+    FOLLOW_USER_SUCCESS,
+    FOLLOW_USER_FAILURE,
+    UNFOLLOW_USER_REQUEST,
+    UNFOLLOW_USER_SUCCESS,
+    UNFOLLOW_USER_FAILURE
 } from "../reducers/user";
 import axios from 'axios';
 
@@ -179,6 +188,58 @@ function* watchLoadUserInfo() {
     yield takeEvery(LOAD_USER_INFO_REQUEST, loadUserInfo);
 }
 
+function followApi (id) {
+    return axios.post(`/users/${id}/follow`, {}, {
+        withCredentials: true,
+    });
+}
+
+function* follow (action) {
+    try {
+        const result = yield call(followApi, action.data);
+        yield put({
+            type: FOLLOW_USER_SUCCESS,
+            data: result.data,
+        })
+    } catch (e){
+        console.error(e);
+        yield put({
+            type: FOLLOW_USER_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchFollow () {
+    yield takeEvery(FOLLOW_USER_REQUEST, follow);
+}
+
+function unFollowApi (id) {
+    return axios.delete(`/users/${id}/follow`, {
+        withCredentials: true,
+    });
+}
+
+function* unFollow (action) {
+    try {
+        const result = yield call(unFollowApi, action.data);
+        yield put({
+            type: UNFOLLOW_USER_SUCCESS,
+            data: result.data,
+        })
+    } catch (e){
+        console.error(e);
+        yield put({
+            type: UNFOLLOW_USER_FAILURE,
+            error: e,
+        });
+    }
+}
+
+function* watchUnFollow () {
+    yield takeEvery(UNFOLLOW_USER_REQUEST, unFollow);
+}
+
 export default function* userSaga() {
     // yield all([
     //     fork(watchLogin),
@@ -194,5 +255,7 @@ export default function* userSaga() {
         fork(watchLoadUser),
         fork(watchLoadUserInfo),
         fork(watchSignUp),
+        fork(watchFollow),
+        fork(watchUnFollow),
     ]);
 };

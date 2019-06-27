@@ -155,6 +155,45 @@ const reducer = (state = initialState, action) => {
                 ...state,
             }
         }
+        case FOLLOW_USER_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case FOLLOW_USER_SUCCESS: {
+            return {
+                ...state,
+                me: {
+                    ...state.me,
+                    Followings: [{ id: action.data },...state.me.Followings], // 팔로잉 목록 추가
+                },
+            }
+        }
+        case FOLLOW_USER_FAILURE: {
+            return {
+                ...state,
+            }
+        }
+        case UNFOLLOW_USER_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case UNFOLLOW_USER_SUCCESS: {
+            return {
+                ...state,
+                me: {
+                    ...state.me,
+                    Followings: state.me.Followings.filter(user => user.id !== action.data)
+                },
+            }
+
+        }
+        case UNFOLLOW_USER_FAILURE: {
+            return {
+                ...state,
+            }
+        }
         default: {
             return {
                 ...state,
