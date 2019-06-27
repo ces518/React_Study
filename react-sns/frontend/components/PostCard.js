@@ -99,9 +99,10 @@ const PostCard = ({ post }) => {
                 extra={<Button>팔로우</Button>}
             >
                 {post.RetweetId && post.Retweet ?
-                    (<Card>
+                    (<Card
+                        cover={post.Retweet.Images[0] && <PostImages images={post.Retweet.Images}/>}
+                    >
                         <Card.Meta // 리트윗한경우
-                            cover={post.Retweet.Images[0] && <PostImages images={post.Retweet.Images}/>}
                             avatar={<Link href={{ pathname: '/user', query: { id: post.Retweet.User.id } }} as={`/user/${post.Retweet.User.id}`}><a><Avatar>{post.Retweet.User.nickname[0]}</Avatar></a></Link>}
                             title={post.Retweet.User.nickname}
                             description={<PostCardContent postData={post.Retweet.content} />} // next 의 Link 태그로 바꾸어주어야함
