@@ -145,17 +145,32 @@ router.get('/:id/follow', (req, res) => {
 
 });
 // 팔로우등록
-router.post('/:id/follow', (req, res) => {
-
+router.post('/:id/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const me = await db.User.findOne({
+            where: { id: req.user.id },
+        });
+        await me.addFollowing(req.params.id);
+        res.send(req.params.id);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
 });
 // 팔로우 취소
-router.delete('/:id/follow', (req, res) => {
-
+router.delete('/:id/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const me = await db.User.findOne({
+            where: { id: req.user.id },
+        });
+        await me.removeFollowing(req.params.id);
+        res.send(req.params.id);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
 });
-// 팔로워 취소
-router.delete('/:id/follower', (req, res) => {
 
-});
 // 게시글 가져오기
 router.get('/:id/posts', async (req, res, next) => {
     try {

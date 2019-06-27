@@ -1387,3 +1387,35 @@ router.post('/:id/retweet', isLoggedIn, async (req, res, next) => {
     }
 });
 ```
+
+# 팔로우, 언팔로우 라우터
+- req.user 객체를 꺼내서 바로 관계를 지정해줄수도 있지만
+- 가끔 시퀄라이즈 객체가아닐때가 있어 한번 더 조회를 해줌.
+```javascript
+// 팔로우등록
+router.post('/:id/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const me = await db.User.findOne({
+            where: { id: req.user.id },
+        });
+        await me.addFollowing(req.params.id);
+        res.send(req.params.id);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+// 팔로우 취소
+router.delete('/:id/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const me = await db.User.findOne({
+            where: { id: req.user.id },
+        });
+        await me.removeFollowing(req.params.id);
+        res.send(req.params.id);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```
