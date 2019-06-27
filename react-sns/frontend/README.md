@@ -2826,3 +2826,54 @@ PostCard.proptypes = {
 
 export default PostCard;
 ```
+
+
+# 리트윗 화면 만들기
+- 게시글 내용 컴포넌트로 분리 및 분기
+
+- PostCardContent.js
+```javascript
+import React from 'react';
+import Link from "next/link";
+import PropTypes from 'prop-types';
+
+const PostCardContent = ({ postData }) => {
+    return (
+        <div>{postData.split(/(#[^\s]+)/g).map(v => {
+            if (v.match(/#[^\s]+/)) {
+                return (
+                    <Link href={{ pathname: '/hashtag', query: { tag: v.slice(1) } }} as={`/hashtag/${v.slice(1)}`} key={v}><a>{v}</a></Link>
+                )
+            }
+            return v;
+        })}</div>
+    );
+};
+
+PostCardContent.propTypes = {
+    postData: PropTypes.string.isRequired,
+};
+
+export default PostCardContent;
+``` 
+
+- PostCard.js
+    - 리트윗한경우 내 게시글 내부에 리트윗 게시글 띄워주기
+```javascript
+{post.RetweetId && post.Retweet ?
+    (<Card>
+        <Card.Meta // 리트윗한경우
+            cover={post.Retweet.Images[0] && <PostImages images={post.Retweet.Images}/>}
+            avatar={<Link href={{ pathname: '/user', query: { id: post.Retweet.User.id } }} as={`/user/${post.Retweet.User.id}`}><a><Avatar>{post.Retweet.User.nickname[0]}</Avatar></a></Link>}
+            title={post.Retweet.User.nickname}
+            description={<PostCardContent postData={post.Retweet.content} />} // next 의 Link 태그로 바꾸어주어야함
+        />
+    </Card>)
+    :
+    (<Card.Meta // 리트윗안한경우
+        avatar={<Link href={{ pathname: '/user', query: { id: post.User.id } }} as={`/user/${post.User.id}`}><a><Avatar>{post.User.nickname[0]}</Avatar></a></Link>}
+        title={post.User.nickname}
+        description={<PostCardContent postData={post.content} />} // next 의 Link 태그로 바꾸어주어야함
+    />)
+}
+```
