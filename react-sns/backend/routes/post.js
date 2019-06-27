@@ -35,6 +35,15 @@ router.get('/', async (req, res, next) => {
                 through: 'Like',
                 as: 'Likers',
                 attributes: ['id'],
+            }, {
+                model: db.Post,
+                as: 'Retweet',
+                include: [{
+                    model: db.User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: db.Image,
+                }],
             }],
             order: [['createdAt', 'DESC']] // 등록일로 내림차순 정렬
         }); // 모든 게시글조회
