@@ -30,6 +30,11 @@ router.get('/', async (req, res, next) => {
                 attribute: ['id', 'nickname'],
             }, {
                 model: db.Image,
+            }, {
+                model: db.User,
+                through: 'Like',
+                as: 'Likers',
+                attributes: ['id'],
             }],
             order: [['createdAt', 'DESC']] // 등록일로 내림차순 정렬
         }); // 모든 게시글조회
@@ -62,7 +67,6 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
                         // slice(1) : # 제거
                     },
             }))); // 저장된 해시태그들이 RESult에 담긴다.
-            console.log(result);
             await newPost.addHashtags(result.map(r => r[0] )); // post에 해시태그 생성된걸 연결해준다.
         }
 
@@ -133,7 +137,6 @@ router.get('/:id/comments', async (req, res, next) => {
                attributes: ['id', 'nickname']
            }],
         });
-        console.log(comments);
         return res.json(comments);
     } catch (e) {
         console.error(e);
@@ -166,6 +169,34 @@ router.post('/:id/comments', isLoggedIn, async (req, res, next) => {
             }],
         });
         return res.json(comment);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.post('/:id/like', isLoggedIn, async (req, res, next) => {
+    try {
+        const post = await db.Post.findOne({ where: { id: req.params.id } });
+        if (!post) {
+            return res.status(404).send('포스트가 존재하지 않습니다.');
+        }
+        await post.addLiker(req.user.id);
+        res.json({ userId: req.user.id });
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.delete('/:id/like', isLoggedIn, async (req, res, next) => {
+    try {
+        const post = await db.Post.findOne({ where: { id: req.params.id } });
+        if (!post) {
+            return res.status(404).send('포스트가 존재하지 않습니다.');
+        }
+        await post.removeLiker(req.user.id);
+        res.json({ userId: req.user.id });
     } catch (e) {
         console.error(e);
         return next(e);

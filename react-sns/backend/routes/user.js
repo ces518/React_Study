@@ -83,7 +83,6 @@ router.post('/', async (req, res, next) => {
             password: hashedPassword,
         });// 유저 생성
 
-        console.log(newUser);
         return res.status(200).json(newUser); // json으로 생성된 유저객체를 응답
     } catch (e) {
         console.error(e);
@@ -137,7 +136,6 @@ router.post('/login', (req, res, next) => { // 로그인 전략을 실행해주�
                 }],
                 attributes: ['id', 'nickname', 'userId']
             });
-            console.log(fullUser);
             return res.json(fullUser); // 클라이언트로 전송
         });
     })(req, res, next);
@@ -170,13 +168,18 @@ router.get('/:id/posts', async (req, res, next) => {
                 attributes: ['id', 'nickname']
             }, {
                 model: db.Image,
+            }, {
+                model: db.User,
+                through: 'Like',
+                as: 'Likers',
+                attributes: ['id'],
             }],
             order: [['createdAt', 'DESC']],
         });
-        res.json(posts);
+        return res.json(posts);
     } catch (e) {
         console.error(e);
-        next(e);
+        return next(e);
     }
 });
 

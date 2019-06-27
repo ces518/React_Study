@@ -4,7 +4,6 @@ const router = express.Router();
 
 router.get('/:tag', async (req, res, next) => {
     try {
-        console.log(req.params.tag);
         const posts = await db.Post.findAll({
             include: [{
                 model: db.Hashtag,
@@ -16,6 +15,11 @@ router.get('/:tag', async (req, res, next) => {
                 attributes: ['id', 'nickname'],
             }, {
                 model: db.Image,
+            }, {
+                model: db.User,
+                through: 'Like',
+                as: 'Likers',
+                attributes: ['id'],
             }],
         });
         console.log(posts);

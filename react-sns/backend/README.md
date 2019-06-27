@@ -1293,3 +1293,37 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     }
 });
 ```
+
+# 좋아요, 싫어요 라우터
+- A 엔티티와 관계를 가지고 있는 B 데이터에 엑세스 하기전에
+- A 엔티티의 데이터가 존재하는지 검증이 필요
+- ex) 해당 포스트가 없다면 좋어요, 싫어요 자체가 진행되어선 안된다.
+```javascript
+router.post('/:id/like', isLoggedIn, async (req, res, next) => {
+    try {
+        const post = await db.Post.findOne({ where: { id: req.params.id } });
+        if (!post) {
+            return res.status(404).send('포스트가 존재하지 않습니다.');
+        }
+        await post.addLiker(req.user.id);
+        res.json({ userId: req.user.id });
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.delete('/:id/like', isLoggedIn, async (req, res, next) => {
+    try {
+        const post = await db.Post.findOne({ where: { id: req.params.id } });
+        if (!post) {
+            return res.status(404).send('포스트가 존재하지 않습니다.');
+        }
+        await post.removeLiker(req.user.id);
+        res.json({ userId: req.user.id });
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```
