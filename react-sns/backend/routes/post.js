@@ -217,12 +217,18 @@ router.delete('/:id/like', isLoggedIn, async (req, res, next) => {
 // 리트윗
 router.post('/:id/retweet', isLoggedIn, async (req, res, next) => {
     try {
-        const post = await db.Post.findOne({ where: { id: req.params.id } });
+        const post = await db.Post.findOne({
+            where: { id: req.params.id },
+            include: [{
+                model: db.Post,
+                as: 'Retweet',
+            }]
+        });
         if (!post) {
             return res.status(404).send('포스트가 존재하지 않습니다.');
         }
 
-        if (req.user.id === post.UserId) { // 자신의글 인지 검증
+        if (req.user.id === post.UserId || (post.Retweet && post.Retweet.UserId === req.user.id)) { // 자신의글 인지 검증
             return res.status(400).send('자신의 글은 리트윗할 수 없습니다.');
         }
 
@@ -248,6 +254,8 @@ router.post('/:id/retweet', isLoggedIn, async (req, res, next) => {
             include: [{
                 model: db.User,
                 attributes: ['id', 'nickname']
+            }, {
+                model: db.Image,
             }, {
                 model: db.Post,
                 as: 'Retweet',
