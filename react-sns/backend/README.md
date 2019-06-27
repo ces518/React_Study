@@ -1327,3 +1327,63 @@ router.delete('/:id/like', isLoggedIn, async (req, res, next) => {
     }
 });
 ```
+
+# 리트윗 라우터
+- 리트윗은 검증이 까다롭다
+    - 본인의 글인지 검증
+    - 리트윗 했던 게시글인지 검증
+    - 리트윗 했던 게시글안에 상대방의 게시글까지 가져와서 뿌려주어야함 
+```javascript
+// 리트윗
+router.post('/:id/retweet', isLoggedIn, async (req, res, next) => {
+    try {
+        const post = await db.Post.findOne({ where: { id: req.params.id } });
+        if (!post) {
+            return res.status(404).send('포스트가 존재하지 않습니다.');
+        }
+
+        if (req.user.id === post.UserId) { // 자신의글 인지 검증
+            return res.status(400).send('자신의 글은 리트윗할 수 없습니다.');
+        }
+
+        const retweetTargetId = post.RetweetId || post.id;
+        const exPost = await db.Post.findOne({
+           where: {
+               UserId: retweetTargetId,
+           }
+        });
+
+        if (exPost) { // 리트윗했던 게시글인지 검증
+            return res.status(400).send('이미 리트윗한 게시글입니다.');
+        }
+
+        const retweet = await db.Post.create({
+            UserId: req.user.id,
+            RetweetId: retweetTargetId,
+            content: 'retweet',
+        });
+
+        const retweetWithPrevPost = await db.Post.findOne({ // 리트윗한 게시글안에 상대방의 게시글까지 들고와야함
+            where: { id: retweet.id },
+            include: [{
+                model: db.User,
+                attributes: ['id', 'nickname']
+            }, {
+                model: db.Post,
+                as: 'Retweet',
+                include: [{
+                    model: db.User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: db.Image,
+                }],
+            }]
+        });
+
+        res.json(retweetWithPrevPost);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```
