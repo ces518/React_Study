@@ -3066,5 +3066,4 @@ PostCard.proptypes = {
 };
 
 export default PostCard;
-
 ```
