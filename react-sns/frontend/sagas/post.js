@@ -26,8 +26,12 @@ import {
     LIKE_POST_FAILURE,
     UNLIKE_POST_REQUEST,
     UNLIKE_POST_SUCCESS,
-    UNLIKE_POST_FAILURE, RETWEET_REQUEST, RETWEET_SUCCESS, RETWEET_FAILURE
+    UNLIKE_POST_FAILURE,
+    RETWEET_REQUEST,
+    RETWEET_SUCCESS,
+    RETWEET_FAILURE
 } from "../reducers/post";
+import { ADD_POST_TO_ME } from "../reducers/user";
 import axios from 'axios';
 
 /////////// addPost
@@ -42,6 +46,10 @@ function* addPost (action) {
         const result = yield call(addPostAPI, action.data);
         yield put({
             type: ADD_POST_SUCCESS,
+            data: result.data,
+        });
+        yield put({
+            type: ADD_POST_TO_ME,
             data: result.data,
         });
     } catch (e) {
