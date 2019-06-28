@@ -1466,3 +1466,22 @@ router.delete('/:id/follower', isLoggedIn, async (req, res, next) => {
     }
 });
 ```
+
+# 닉네임 수정 라우터
+- 부분 수정이므로 patch 사용
+- 시퀄라이즈 update 
+```javascript
+router.patch('/nickname', isLoggedIn, async (req, res, next) => {
+    try {
+        await db.User.update({ // 수정 API
+            nickname: req.body.nickname
+        }, {
+            where: { id: req.user.id },
+        });
+        res.send(req.body.nickname);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```

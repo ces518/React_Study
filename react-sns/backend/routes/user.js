@@ -238,4 +238,18 @@ router.delete('/:id/follower', isLoggedIn, async (req, res, next) => {
     }
 });
 
+router.patch('/nickname', isLoggedIn, async (req, res, next) => {
+    try {
+        await db.User.update({ // 수정 API
+            nickname: req.body.nickname
+        }, {
+            where: { id: req.user.id },
+        });
+        res.send(req.body.nickname);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
 module.exports = router;
