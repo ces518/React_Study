@@ -31,9 +31,13 @@ export const SIGN_UP_REQUEST = 'SIGN_UP_REQUEST';
 export const SIGN_UP_SUCCESS = 'SIGN_UP_SUCCESS';
 export const SIGN_UP_FAILURE = 'SIGN_UP_FAILURE';
 
-export const LOAD_FOLLOW_REQUEST = 'LOAD_FOLLOW_REQUEST';
-export const LOAD_FOLLOW_SUCCESS = 'LOAD_FOLLOW_SUCCESS';
-export const LOAD_FOLLOW_FAILURE = 'LOAD_FOLLOW_FAILURE';
+export const LOAD_FOLLOWINGS_REQUEST = 'LOAD_FOLLOWINGS_REQUEST';
+export const LOAD_FOLLOWINGS_SUCCESS = 'LOAD_FOLLOWINGS_SUCCESS';
+export const LOAD_FOLLOWINGS_FAILURE = 'LOAD_FOLLOWINGS_FAILURE';
+
+export const LOAD_FOLLOWERS_REQUEST = 'LOAD_FOLLOWERS_REQUEST';
+export const LOAD_FOLLOWERS_SUCCESS = 'LOAD_FOLLOWERS_SUCCESS';
+export const LOAD_FOLLOWERS_FAILURE = 'LOAD_FOLLOWERS_FAILURE';
 
 export const FOLLOW_USER_REQUEST = 'FOLLOW_USER_REQUEST';
 export const FOLLOW_USER_SUCCESS = 'FOLLOW_USER_SUCCESS';
@@ -186,8 +190,8 @@ const reducer = (state = initialState, action) => {
                     ...state.me,
                     Followings: state.me.Followings.filter(user => user.id !== action.data)
                 },
+                followingList: state.followingList.filter(user => user.id !== action.data),
             }
-
         }
         case UNFOLLOW_USER_FAILURE: {
             return {
@@ -201,6 +205,60 @@ const reducer = (state = initialState, action) => {
                     ...state.me,
                     Posts: [{ id: action.data }, ...state.me.Posts],
                 }
+            }
+        }
+        case LOAD_FOLLOWERS_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case LOAD_FOLLOWERS_SUCCESS: {
+            return {
+                ...state,
+                followerList: action.data,
+            }
+
+        }
+        case LOAD_FOLLOWERS_FAILURE: {
+            return {
+                ...state,
+            }
+        }
+        case LOAD_FOLLOWINGS_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case LOAD_FOLLOWINGS_SUCCESS: {
+            return {
+                ...state,
+                followingList: action.data,
+            }
+
+        }
+        case LOAD_FOLLOWINGS_FAILURE: {
+            return {
+                ...state,
+            }
+        }
+        case REMOVE_FOLLOWER_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case REMOVE_FOLLOWER_SUCCESS: {
+            return {
+                ...state,
+                me: {
+                    ...state.me,
+                    Followers: state.me.Followers.filter(v => v.id !== action.data),
+                },
+                followerList: state.followerList.filter(v => v.id !== action.data),
+            }
+        }
+        case REMOVE_FOLLOWER_FAILURE: {
+            return {
+                ...state,
             }
         }
         default: {

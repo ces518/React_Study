@@ -3071,3 +3071,102 @@ export default PostCard;
 # 다른 리듀서 데이터 조작
 - 리듀서의 한계가 해당 리듀서의 데이터는 그 리듀서 내에서만 조작이 가능하다
 - SAGA를 통해서 다른 리듀서의 데이터를 조작하는 액션을 디스패치해주어야함.
+
+
+# 프로필 및 데이터 로딩
+- 팔로워 목록, 팔로잉 목록, 내 게시글 목록 로드
+- 팔로잉 취소 팔로워 끊기 
+- profile.js  
+```javascript
+import React, { useEffect, useCallback } from 'react';
+import { Button, List, Card, Icon } from 'antd';
+import { useSelector, useDispatch } from 'react-redux';
+import Router from 'next/router';
+import NicknameEditForm from "../components/NicknameEditForm";
+import PostCard from '../components/PostCard';
+import { LOAD_FOLLOWERS_REQUEST, LOAD_FOLLOWINGS_REQUEST, UNFOLLOW_USER_REQUEST, REMOVE_FOLLOWER_REQUEST } from '../reducers/user';
+import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
+
+const Profile = () => {
+    const dispatch = useDispatch();
+    const { me, followingList, followerList } = useSelector(state => state.user);
+    const { mainPosts } = useSelector(state => state.post);
+    useEffect(() => {
+        if (me) {
+            dispatch({
+                type: LOAD_FOLLOWERS_REQUEST,
+                data: me.id,
+            });
+            dispatch({
+                type: LOAD_FOLLOWINGS_REQUEST,
+                data: me.id,
+            });
+            dispatch({
+                type: LOAD_USER_POSTS_REQUEST,
+                data: me.id,
+            });
+        }
+    }, [me && me.id]);
+
+    const onUnfollow = useCallback(id => () => {
+        dispatch({
+            type: UNFOLLOW_USER_REQUEST,
+            data: id,
+        });
+    }, []);
+
+    const onRemoveFollower = useCallback(id => () => {
+        dispatch({
+            type: REMOVE_FOLLOWER_REQUEST,
+            data: id,
+        });
+    }, []);
+
+    return (
+        <>
+            <div>
+                <NicknameEditForm/>
+                <List
+                    style={{ marginBottom: '20px' }}
+                    grid={{ gutter: 4, xs: 2, md: 3 }}
+                    size="smail"
+                    header={<div>팔로잉 목록</div>}
+                    loadMore={<Button style={{ width: '100%' }}>더 보기</Button>}
+                    bordered
+                    dataSource={followingList}
+                    renderItem={item => (
+                        <List.Item style={{ marginTop: '20px' }}>
+                            <Card actions={[<Icon key="stop" type="stop" />]} onClick={onUnfollow(item.id)}>
+                                <Card.Meta description={item.nickname}/>
+                            </Card>
+                        </List.Item>
+                    )}
+                />
+                <List
+                    style={{ marginBottom: '20px' }}
+                    grid={{ gutter: 4, xs: 2, md: 3 }}
+                    size="smail"
+                    header={<div>팔로워 목록</div>}
+                    loadMore={<Button style={{ width: '100%' }}>더 보기</Button>}
+                    bordered
+                    dataSource={followerList}
+                    renderItem={item => (
+                        <List.Item style={{ marginTop: '20px' }}>
+                            <Card actions={[<Icon key="stop" type="stop" />]} onClick={onRemoveFollower(item.id)}>
+                                <Card.Meta description={item.nickname}/>
+                            </Card>
+                        </List.Item>
+                    )}
+                />
+                <div>
+                    {mainPosts.map(c => (
+                        <PostCard key={+c.createdAt} post={c} />
+                    ))}
+                </div>
+            </div>
+        </>
+    )
+};
+
+export default Profile;
+```
