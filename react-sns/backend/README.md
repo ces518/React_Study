@@ -1419,3 +1419,50 @@ router.delete('/:id/follow', isLoggedIn, async (req, res, next) => {
     }
 });
 ```
+
+# 팔로잉 목록, 팔로워목록, 팔로워끊기 라우터
+- 시퀄라이즈에서 제공하는 getFollowings 등 관계 함수에 조건을 줄수있음.
+```javascript
+router.get('/:id/followings', isLoggedIn, async (req, res ,next) => {
+    try {
+        const user = await db.User.findOne({
+            where: { id: parseInt(req.params.id, 10) },
+        });
+        const followings = await user.getFollowings({ // findOne 과 같이 조건을 줄수있음.
+            attributes: ['id', 'nickname']
+        }); // 유저와 팔로워 관계인 목록을 가져옴.
+        res.json(followings);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.get('/:id/followers', isLoggedIn, async (req, res ,next) => {
+    try {
+        const user = await db.User.findOne({
+            where: { id: parseInt(req.params.id, 10) },
+        });
+        const followers = await user.getFollowers({ // findOne 과 같이 조건을 줄수있음.
+            attributes: ['id', 'nickname']
+        }); // 유저와 팔로워 관계인 목록을 가져옴.
+        res.json(followers);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.delete('/:id/follower', isLoggedIn, async (req, res, next) => {
+    try {
+        const me = await db.User.findOne({
+            where: { id: req.user.id },
+        });
+        await me.removeFollower(req.params.id);
+        res.send(req.params.id);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```

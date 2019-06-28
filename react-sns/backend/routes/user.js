@@ -140,10 +140,7 @@ router.post('/login', (req, res, next) => { // 로그인 전략을 실행해주�
         });
     })(req, res, next);
 });
-// 팔로우목록
-router.get('/:id/follow', (req, res) => {
 
-});
 // 팔로우등록
 router.post('/:id/follow', isLoggedIn, async (req, res, next) => {
     try {
@@ -192,6 +189,49 @@ router.get('/:id/posts', async (req, res, next) => {
             order: [['createdAt', 'DESC']],
         });
         return res.json(posts);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.get('/:id/followings', isLoggedIn, async (req, res ,next) => {
+    try {
+        const user = await db.User.findOne({
+            where: { id: parseInt(req.params.id, 10) },
+        });
+        const followings = await user.getFollowings({ // findOne 과 같이 조건을 줄수있음.
+            attributes: ['id', 'nickname']
+        }); // 유저와 팔로워 관계인 목록을 가져옴.
+        res.json(followings);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.get('/:id/followers', isLoggedIn, async (req, res ,next) => {
+    try {
+        const user = await db.User.findOne({
+            where: { id: parseInt(req.params.id, 10) },
+        });
+        const followers = await user.getFollowers({ // findOne 과 같이 조건을 줄수있음.
+            attributes: ['id', 'nickname']
+        }); // 유저와 팔로워 관계인 목록을 가져옴.
+        res.json(followers);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.delete('/:id/follower', isLoggedIn, async (req, res, next) => {
+    try {
+        const me = await db.User.findOne({
+            where: { id: req.user.id },
+        });
+        await me.removeFollower(req.params.id);
+        res.send(req.params.id);
     } catch (e) {
         console.error(e);
         return next(e);
