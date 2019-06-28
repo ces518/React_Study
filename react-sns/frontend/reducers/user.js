@@ -1,18 +1,12 @@
-const dummyUser = {
-    nickname: '박준영',
-    post: [],
-    following: [],
-    follower: [],
-    id: 1,
-};
-
 export const initialState = {
     isLoggingOut: false, // 로그아웃 시도중
     isLoggingIn: false, // 로그인 시도중
+    isEdittingNickname: false, // 닉네임 변경 시도중
     loginErrorReason: '', // 로그인실패 이유
     signedUp: false, // 회원가입 성공 여부
     isSigningUp: false, // 회원가입 시도중
     signUpErrorReason: '', //회원가입실패사유
+    editNicknameErrorReason: '', // 이름변경 실패사유
     me: null,
     followingList: [], // 팔로잉 목록
     followerList: [], // 팔로워목록
@@ -60,6 +54,11 @@ export const LOAD_USER_INFO_SUCCESS = 'LOAD_USER_INFO_SUCCESS';
 export const LOAD_USER_INFO_FAILURE = 'LOAD_USER_INFO_FAILURE';
 
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME'; // 중요한 액션, reducer의 단점때문에 어쩔수 없이 만든 액션
+
+export const EDIT_NICKNAME_REQUEST = 'EDIT_NICKNAME_REQUEST';
+export const EDIT_NICKNAME_SUCCESS = 'EDIT_NICKNAME_SUCCESS';
+export const EDIT_NICKNAME_FAILURE = 'EDIT_NICKNAME_FAILURE';
+
 
 const reducer = (state = initialState, action) => {
     switch (action.type) {
@@ -259,6 +258,30 @@ const reducer = (state = initialState, action) => {
         case REMOVE_FOLLOWER_FAILURE: {
             return {
                 ...state,
+            }
+        }
+        case EDIT_NICKNAME_REQUEST: {
+            return {
+                ...state,
+                isEdittingNickname: true,
+            }
+        }
+        case EDIT_NICKNAME_SUCCESS: {
+            return {
+                ...state,
+                me: {
+                    ...state.me,
+                    nickname: action.data,
+                },
+                isEdittingNickname: false,
+            }
+
+        }
+        case EDIT_NICKNAME_FAILURE: {
+            return {
+                ...state,
+                isEdittingNickname: false,
+                editNicknameErrorReason: action.error,
             }
         }
         default: {

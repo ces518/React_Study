@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { Button, List, Card, Icon } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import Router from 'next/router';
@@ -11,6 +11,7 @@ const Profile = () => {
     const dispatch = useDispatch();
     const { me, followingList, followerList } = useSelector(state => state.user);
     const { mainPosts } = useSelector(state => state.post);
+
     useEffect(() => {
         if (me) {
             dispatch({
