@@ -49,4 +49,11 @@ function mapDispatchToProps (dispatch) {
     }
 };
 
+Home.getInitialProps = async (context) => { // context: app.js 에서넣어주는 context.ctx
+    console.log(Object.keys(context)); // store 가 존재하는데 redux-store 임
+    context.store.dispatch({
+        type: LOAD_MAIN_POSTS_REQUEST,
+    });
+};
+
 export default Home;

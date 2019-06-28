@@ -5,6 +5,7 @@ import withRedux from 'next-redux-wrapper';
 import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
+import withReduxSaga from 'next-redux-saga';
 
 import AppLayout from "../components/AppLayout";
 import reducer from '../reducers';
@@ -56,10 +57,8 @@ const configureStore = (initialState, options) => {
             !options.isServer && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
         );
     const store = createStore(reducer, initialState, enhancer);
-
-    sagaMiddleware.run(rootSaga); // rootSaga를 run 해주어야함.
-
+    store.sagaTask = sagaMiddleware.run(rootSaga); // rootSaga를 run 해주어야함.
     return store;
 };
 
-export default withRedux(configureStore)(ReactBird);
+export default withRedux(configureStore)(withReduxSaga(ReactBird));

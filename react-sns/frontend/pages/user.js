@@ -49,7 +49,9 @@ User.proptypes = {
 };
 
 
-User.getInitialProps = async (context) => {
+User.getInitialProps = async (context) => { // SSR 핵심. 서버쪽에서 1회 실행, 프론트에서도 실행됨.
+                                            // 서버에서 데이터를 받아올 수 있음.
+                                            // next
     console.log('user getInitialProps', context.query.id);
     return { id: parseInt(context.query.id, 10) };
 };

@@ -3207,3 +3207,54 @@ const NicknameEditForm = () => {
 
 export default NicknameEditForm;
 ```
+
+# 서버사이드 랜더링
+- SSR
+- 검색엔진 최적화를 위해 SSR을 사용한다.
+- 새로 고침했을때 빈페이지가 순간적으로 보이는 UX 측면에서도 좋음.
+
+- SSR 을할때 next를 추천해는이유 
+    - getInitialProps 라는 라이프사이클이 존재하기때문
+    - next를 사용하지않더라도 이 사이클을 직접 구현해주어야함.
+    - 서버에서 1회 호출되는 사이클임.
+- context
+    - _app.js 에서 넣어주는 context.ctx 객체이다.
+    - ctx 에는 store가 존재한다
+    - store 는 redux임
+    - store.dispatch, state 등을 제어할수있다.
+- index.js
+```javascript
+Home.getInitialProps = async (context) => { // context: app.js 에서넣어주는 context.ctx
+    console.log(Object.keys(context)); // store 가 존재하는데 redux-store 임
+    context.store.dispatch({
+        type: LOAD_MAIN_POSTS_REQUEST,
+    });
+};
+```
+
+- 무작정 사용하면 제대로 동작하지 않기때문에 next용 사가가 필요함
+- next 용 사가 설치
+    - npm i next-redux-saga
+
+- _app.js
+    - store.sagaTask 부분에 sagaMiddleware를 적용.
+    - withRedux 에는 적용된 configureStore 부분이
+    - withReduxSaga에서 필요로한다.
+```javascript
+const configureStore = (initialState, options) => {
+    const sagaMiddleware = createSagaMiddleware(); // middleware를 사용할때 문제가
+    // 발생할 여지가 존재하기때문에 configureStore에서 생성하는것으로 변경
+
+    const middlewares = [sagaMiddleware]; // redux - saga middleware 연결
+    const enhancer = process.env.NODE_ENV === 'production' ?
+        compose(applyMiddleware(...middlewares))
+        :
+        compose(applyMiddleware(...middlewares),
+            !options.isServer && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
+        );
+    const store = createStore(reducer, initialState, enhancer); 
+    store.sagaTask = sagaMiddleware.run(rootSaga); // rootSaga를 run 해주어야함.
+    return store;
+};
+export default withRedux(configureStore)(withReduxSaga(ReactBird));
+```
