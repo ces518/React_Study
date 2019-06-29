@@ -171,12 +171,14 @@ router.delete('/:id/follow', isLoggedIn, async (req, res, next) => {
 // 게시글 가져오기
 router.get('/:id/posts', async (req, res, next) => {
     try {
+        console.log('posts = ', parseInt(req.params.id, 10) || (req.user && req.user.id) || 0);
         const posts = await db.Post.findAll({
+            where: {
+                UserId: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+                RetweetId: null,
+            },
             include: [{
                 model: db.User,
-                where: {
-                    id: req.params.id,
-                },
                 attributes: ['id', 'nickname']
             }, {
                 model: db.Image,
@@ -198,7 +200,7 @@ router.get('/:id/posts', async (req, res, next) => {
 router.get('/:id/followings', isLoggedIn, async (req, res ,next) => {
     try {
         const user = await db.User.findOne({
-            where: { id: parseInt(req.params.id, 10) },
+            where: { id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0 },
         });
         const followings = await user.getFollowings({ // findOne 과 같이 조건을 줄수있음.
             attributes: ['id', 'nickname']
@@ -213,7 +215,7 @@ router.get('/:id/followings', isLoggedIn, async (req, res ,next) => {
 router.get('/:id/followers', isLoggedIn, async (req, res ,next) => {
     try {
         const user = await db.User.findOne({
-            where: { id: parseInt(req.params.id, 10) },
+            where: { id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0 },
         });
         const followers = await user.getFollowers({ // findOne 과 같이 조건을 줄수있음.
             attributes: ['id', 'nickname']
