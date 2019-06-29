@@ -3444,3 +3444,59 @@ function* removePost(action) {
     }
 }
 ```
+
+# 페이지 네이션
+- 게시글을 한번에 불러오면 브라우저에 무리가 가기때문에
+- 페이지네이션을 적용
+- 한번에 불러오는 단위를 Limit 
+- 3개씩 불러오도록 구현
+- 시작하는 게시글 단위를 offset
+
+- 팔로잉, 팔로워 더보기 이벤트
+```javascript
+    const loadMoreFollowings = useCallback(() => {
+        dispatch({
+            type: LOAD_FOLLOWINGS_REQUEST,
+            data: {
+                offset: followingList.length,
+            }
+        });
+    }, [followingList && followingList.length]);
+
+    const loadMoreFollowers = useCallback(() => {
+        dispatch({
+            type: LOAD_FOLLOWERS_REQUEST,
+            data: {
+                offset: followerList.length,
+            }
+        });
+    }, [followerList && followerList.length]);
+```
+
+- offset, limit 을 활용하여 페이지네이션 
+- sagas/user.js
+```javascript
+function loadFollowingsAPI (id, offset = 0, limit = 3) {
+    return axios.get(`/users/${id || 0}/followings?offset=${offset}&limit=${limit}`, {
+        withCredentials: true,
+    });
+}
+
+function* loadFollowings (action) {
+    try {
+        const { id, offset, limit } = action.data;
+        const result = yield call(loadFollowingsAPI, id, offset, limit);
+        yield put({
+            type: LOAD_FOLLOWINGS_SUCCESS,
+            data: result.data,
+        })
+    } catch (e){
+        console.error(e);
+        yield put({
+            type: LOAD_FOLLOWINGS_FAILURE,
+            error: e,
+        });
+    }
+}
+
+```
