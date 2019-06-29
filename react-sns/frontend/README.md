@@ -3393,3 +3393,29 @@ function loadHashtagPostsAPI(tag) {
     return axios.get(`/hashtag/${encodeURIComponent(tag)}`);
 }
 ```
+
+# SSR에서 내정보 처리하기
+- profile 부분에서 문제점
+- _app.js 에서 LOAD_USER_REQUEST 가 진행후 바로 LOAD_FOLLOWERS, LOAD_FOLLOWINGS 가 진행되기 때문에
+- SUCCESS이전 상태에 요청을 보내게 되므로 user.me.id 의 값이 없게됨.
+- 파훼법
+    - 1. 본인의 프로필을 조회하는경우 0 의 기본값을 넘긴다
+    - 2. 라우터에서 0의값이 넘어올경우 본인 프로필로 간주 req.user.id 로 조회.
+- user.js
+```javascript
+Profile.getInitialProps = async (context) => {
+    const state = context.store.getState();
+    context.store.dispatch({
+        type: LOAD_FOLLOWERS_REQUEST,
+        data: state.user.me && state.user.me.id,
+    });
+    context.store.dispatch({
+        type: LOAD_FOLLOWINGS_REQUEST,
+        data: state.user.me && state.user.me.id,
+    });
+    context.store.dispatch({
+        type: LOAD_USER_POSTS_REQUEST,
+        data: state.user.me && state.user.me.id,
+    });
+};
+```
