@@ -3382,3 +3382,14 @@ const configureStore = (initialState, options) => {
     return store;
 };
 ```
+
+# 해시태그 SSR
+- 요청 URI에 한글이 들어가면 에러가 발생
+- sagas/post.js
+    - 한글 파라메터가 올수 있는부분에 encodeURIComponent로 감싸준다.
+    - 서버에서 받아올때도 디코딩 작업 필요
+```javascript
+function loadHashtagPostsAPI(tag) {
+    return axios.get(`/hashtag/${encodeURIComponent(tag)}`);
+}
+```
