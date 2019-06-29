@@ -65,7 +65,10 @@ const configureStore = (initialState, options) => {
     const sagaMiddleware = createSagaMiddleware(); // middleware를 사용할때 문제가
     // 발생할 여지가 존재하기때문에 configureStore에서 생성하는것으로 변경
 
-    const middlewares = [sagaMiddleware]; // redux - saga middleware 연결
+    const middlewares = [sagaMiddleware, (store) => (next) => (action) => {
+        console.log(action);
+        next(action);
+    }]; // redux - saga middleware 연결
     const enhancer = process.env.NODE_ENV === 'production' ?
         compose(applyMiddleware(...middlewares))
         :

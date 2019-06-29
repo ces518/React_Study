@@ -3359,3 +3359,26 @@ User.getInitialProps = async (context) => { // SSR 핵심. 서버쪽에서 1회 
 export default User;
 ```
 
+# Redux-SAGA - Logging
+- 커스텀 미들웨어를 만들어서 Redux-SAGA 액션 로깅
+- _app.js
+```javascript
+const configureStore = (initialState, options) => {
+    const sagaMiddleware = createSagaMiddleware(); // middleware를 사용할때 문제가
+    // 발생할 여지가 존재하기때문에 configureStore에서 생성하는것으로 변경
+
+    const middlewares = [sagaMiddleware, (store) => (next) => (action) => { // 커스텀 미들웨어 
+        console.log(action);
+        next(action);
+    }]; // redux - saga middleware 연결
+    const enhancer = process.env.NODE_ENV === 'production' ?
+        compose(applyMiddleware(...middlewares))
+        :
+        compose(applyMiddleware(...middlewares),
+            !options.isServer && window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined' ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f, // REDUX_DEVTOOLS 확장프로그램이 있을경우 미들웨어로 추가
+        );
+    const store = createStore(reducer, initialState, enhancer);
+    store.sagaTask = sagaMiddleware.run(rootSaga); // rootSaga를 run 해주어야함.
+    return store;
+};
+```
