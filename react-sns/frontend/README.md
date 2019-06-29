@@ -3498,5 +3498,8 @@ function* loadFollowings (action) {
         });
     }
 }
-
 ```
+
+# 더보기 버튼 삭제
+- 더이상 불러올 데이터가 없을경우 더보기 버튼 삭제.
+- hasMoreXX 플래그값 활용 제어 

@@ -9,7 +9,7 @@ import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
 
 const Profile = () => {
     const dispatch = useDispatch();
-    const { me, followingList, followerList } = useSelector(state => state.user);
+    const { me, followingList, followerList, hasMoreFollower, hasMoreFollowing } = useSelector(state => state.user);
     const { mainPosts } = useSelector(state => state.post);
 
     const onUnfollow = useCallback(id => () => {
@@ -29,18 +29,14 @@ const Profile = () => {
     const loadMoreFollowings = useCallback(() => {
         dispatch({
             type: LOAD_FOLLOWINGS_REQUEST,
-            data: {
-                offset: followingList.length,
-            }
+            offset: followingList.length,
         });
     }, [followingList && followingList.length]);
 
     const loadMoreFollowers = useCallback(() => {
         dispatch({
             type: LOAD_FOLLOWERS_REQUEST,
-            data: {
-                offset: followerList.length,
-            }
+            offset: followerList.length,
         });
     }, [followerList && followerList.length]);
 
@@ -53,7 +49,7 @@ const Profile = () => {
                     grid={{ gutter: 4, xs: 2, md: 3 }}
                     size="smail"
                     header={<div>팔로잉 목록</div>}
-                    loadMore={<Button style={{ width: '100%' }} onClick={loadMoreFollowings}>더 보기</Button>}
+                    loadMore={hasMoreFollowing ? <Button style={{ width: '100%' }} onClick={loadMoreFollowings}>더 보기</Button> : null}
                     bordered
                     dataSource={followingList}
                     renderItem={item => (
@@ -69,7 +65,7 @@ const Profile = () => {
                     grid={{ gutter: 4, xs: 2, md: 3 }}
                     size="smail"
                     header={<div>팔로워 목록</div>}
-                    loadMore={<Button style={{ width: '100%' }} onClick={loadMoreFollowers}>더 보기</Button>}
+                    loadMore={hasMoreFollower ? <Button style={{ width: '100%' }} onClick={loadMoreFollowers}>더 보기</Button> : null}
                     bordered
                     dataSource={followerList}
                     renderItem={item => (
@@ -94,21 +90,15 @@ Profile.getInitialProps = async (context) => {
     const state = context.store.getState();
     context.store.dispatch({
         type: LOAD_FOLLOWERS_REQUEST,
-        data: {
-            id: state.user.me && state.user.me.id
-        },
+        data: state.user.me && state.user.me.id
     });
     context.store.dispatch({
         type: LOAD_FOLLOWINGS_REQUEST,
-        data: {
-            id: state.user.me && state.user.me.id
-        },
+        data: state.user.me && state.user.me.id
     });
     context.store.dispatch({
         type: LOAD_USER_POSTS_REQUEST,
-        data: {
-            id: state.user.me && state.user.me.id
-        },
+        data: state.user.me && state.user.me.id
     });
 };
 

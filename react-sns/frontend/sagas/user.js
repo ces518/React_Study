@@ -261,8 +261,7 @@ function loadFollowersAPI (id, offset = 0, limit = 3) {
 
 function* loadFollowers (action) {
     try {
-        const { id, offset, limit } = action.data;
-        const result = yield call(loadFollowersAPI, id, offset, limit);
+        const result = yield call(loadFollowersAPI, action.data, action.offset);
         yield put({
             type: LOAD_FOLLOWERS_SUCCESS,
             data: result.data,
@@ -288,8 +287,7 @@ function loadFollowingsAPI (id, offset = 0, limit = 3) {
 
 function* loadFollowings (action) {
     try {
-        const { id, offset, limit } = action.data;
-        const result = yield call(loadFollowingsAPI, id, offset, limit);
+        const result = yield call(loadFollowingsAPI, action.data, action.offset);
         yield put({
             type: LOAD_FOLLOWINGS_SUCCESS,
             data: result.data,
