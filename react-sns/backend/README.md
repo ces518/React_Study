@@ -1485,3 +1485,43 @@ router.patch('/nickname', isLoggedIn, async (req, res, next) => {
     }
 });
 ```
+
+
+# 프로필 - 팔로잉, 팔로워 페이지네이션 구현
+- limit: 한번에 가져올 단위갯수
+- offset: 시작 index
+```javascript
+router.get('/:id/followings', isLoggedIn, async (req, res ,next) => {
+    try {
+        const user = await db.User.findOne({
+            where: { id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0 },
+        });
+        const followings = await user.getFollowings({ // findOne 과 같이 조건을 줄수있음.
+            limit: parseInt(req.query.limit, 10),
+            offset: parseInt(req.query.offset, 10),
+            attributes: ['id', 'nickname']
+        }); // 유저와 팔로워 관계인 목록을 가져옴.
+        res.json(followings);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
+router.get('/:id/followers', isLoggedIn, async (req, res ,next) => {
+    try {
+        const user = await db.User.findOne({
+            where: { id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0 },
+        });
+        const followers = await user.getFollowers({ // findOne 과 같이 조건을 줄수있음.
+            limit: parseInt(req.query.limit, 10),
+            offset: parseInt(req.query.offset, 10),
+            attributes: ['id', 'nickname'],
+        }); // 유저와 팔로워 관계인 목록을 가져옴.
+        res.json(followers);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```
