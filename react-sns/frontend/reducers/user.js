@@ -54,6 +54,7 @@ export const LOAD_USER_INFO_SUCCESS = 'LOAD_USER_INFO_SUCCESS';
 export const LOAD_USER_INFO_FAILURE = 'LOAD_USER_INFO_FAILURE';
 
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME'; // 중요한 액션, reducer의 단점때문에 어쩔수 없이 만든 액션
+export const REMOVE_POST_OF_ME = 'REMOVE_POST_OF_ME'; //
 
 export const EDIT_NICKNAME_REQUEST = 'EDIT_NICKNAME_REQUEST';
 export const EDIT_NICKNAME_SUCCESS = 'EDIT_NICKNAME_SUCCESS';
@@ -282,6 +283,15 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 isEdittingNickname: false,
                 editNicknameErrorReason: action.error,
+            }
+        }
+        case REMOVE_POST_OF_ME: {
+            return {
+                ...state,
+                me: {
+                    ...state.me,
+                    Posts: state.me.Posts.filter(post => post.id !== action.data),
+                }
             }
         }
         default: {

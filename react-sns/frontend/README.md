@@ -3419,3 +3419,28 @@ Profile.getInitialProps = async (context) => {
     });
 };
 ```
+
+# 게시글 삭제
+- 실제 게시글을 삭제하고, 게시글 목록에서 제거, 우측 짹짹에서도 카운트를 내려주어야함
+- REMOVE_POST_OF_ME 액션을 추가정의하여 사용 
+```javascript
+function* removePost(action) {
+    try {
+        const result = yield call(removePostAPI, action.data);
+        yield put({
+            type: REMOVE_POST_SUCCESS,
+            data: result.data
+        });
+        yield put({
+            type: REMOVE_POST_OF_ME,
+            data: result.data
+        });
+    } catch (e) {
+        console.error(e);
+        yield put({
+            type: REMOVE_POST_FAILURE,
+            error: e,
+        });
+    }
+}
+```

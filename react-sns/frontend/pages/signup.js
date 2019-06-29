@@ -43,6 +43,10 @@ const Signup = () => {
         }
     }, [me && me.id]);
 
+    if (me) {
+        return null;
+    }
+
     const onSubmit = useCallback((e) => {
         e.preventDefault();
 

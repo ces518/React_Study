@@ -261,6 +261,22 @@ const reducer = (state = initialState, action) => {
                 ...state,
             }
         }
+        case REMOVE_POST_REQUEST: {
+            return {
+                ...state,
+            }
+        }
+        case REMOVE_POST_SUCCESS: { // 게시글 맨앞에 추가
+            return {
+                ...state,
+                mainPosts: state.mainPosts.filter(post => post.id !== action.data),
+            }
+        }
+        case REMOVE_POST_FAILURE: {
+            return {
+                ...state,
+            }
+        }
         default: {
             return {
                 ...state,
