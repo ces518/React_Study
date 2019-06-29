@@ -3298,3 +3298,64 @@ ReactBird.getInitialProps = async (context) => {
   return { pageProps };
 };
 ```
+
+# 사용자 프로필 SSR
+- 기존에 useEffect 부분을 getInitialProps 로 옮겨서 SSR로 변경
+
+```javascript
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
+import PostCard from '../components/PostCard';
+import PropTypes from 'prop-types';
+import { Avatar, Card } from "antd";
+import {LOAD_USER_INFO_REQUEST} from "../reducers/user";
+
+const User = ({ id }) => {
+    const { mainPosts } = useSelector(state => state.post);
+    const { userInfo } = useSelector(state => state.user);
+    return (
+        <div>
+            {userInfo
+                ? <Card
+                    actions={[
+                        <div key="twit">짹짹<br/>{userInfo.Posts}</div>,
+                        <div key="following">팔로잉<br/>{userInfo.Followings}</div>,
+                        <div key="follower">팔로워<br/>{userInfo.Followers}</div>
+                    ]}
+                >
+                    <Card.Meta
+                        avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
+                        title={userInfo.nickname}
+                    />
+                </Card>
+                : null}
+            {mainPosts.map(c => (
+                <PostCard key={+c.createdAt} post={c}/>
+            ))}
+        </div>
+    )
+};
+
+User.proptypes = {
+    id: PropTypes.number.isRequired,
+};
+
+
+User.getInitialProps = async (context) => { // SSR 핵심. 서버쪽에서 1회 실행, 프론트에서도 실행됨.
+
+    const id = parseInt(context.query.id, 10);
+    context.store.dispatch({
+        type: LOAD_USER_INFO_REQUEST,
+        data: id,
+    });
+    context.store.dispatch({
+        type: LOAD_USER_POSTS_REQUEST,
+        data: id,
+    });
+    return { id };
+};
+
+export default User;
+```
+

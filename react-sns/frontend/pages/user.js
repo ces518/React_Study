@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { LOAD_USER_POSTS_REQUEST } from '../reducers/post';
 import PostCard from '../components/PostCard';
 import PropTypes from 'prop-types';
@@ -7,20 +7,8 @@ import { Avatar, Card } from "antd";
 import {LOAD_USER_INFO_REQUEST} from "../reducers/user";
 
 const User = ({ id }) => {
-    const dispatch = useDispatch();
     const { mainPosts } = useSelector(state => state.post);
     const { userInfo } = useSelector(state => state.user);
-
-    useEffect(() => {
-        dispatch({
-            type: LOAD_USER_INFO_REQUEST,
-            data: id,
-        });
-        dispatch({
-            type: LOAD_USER_POSTS_REQUEST,
-            data: id,
-        });
-    }, []);
     return (
         <div>
             {userInfo
@@ -50,10 +38,17 @@ User.proptypes = {
 
 
 User.getInitialProps = async (context) => { // SSR 핵심. 서버쪽에서 1회 실행, 프론트에서도 실행됨.
-                                            // 서버에서 데이터를 받아올 수 있음.
-                                            // next
-    console.log('user getInitialProps', context.query.id);
-    return { id: parseInt(context.query.id, 10) };
+
+    const id = parseInt(context.query.id, 10);
+    context.store.dispatch({
+        type: LOAD_USER_INFO_REQUEST,
+        data: id,
+    });
+    context.store.dispatch({
+        type: LOAD_USER_POSTS_REQUEST,
+        data: id,
+    });
+    return { id };
 };
 
 export default User;
