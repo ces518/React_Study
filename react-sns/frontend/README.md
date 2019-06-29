@@ -3258,3 +3258,43 @@ const configureStore = (initialState, options) => {
 };
 export default withRedux(configureStore)(withReduxSaga(ReactBird));
 ```
+
+# SSR 을 위한 쿠키 넣어주기
+- getInitialProps 의 라이프사이클을 기억
+- 서버에서 1번실행되고 클라이언트에서도 실행이된다.
+    - 서버에서 실행될 경우
+        - 서버에서 실행될 경우에는 브라우저가 존재하지않기떄문에 axios통신시 쿠키를 자동으로 넣어주지 않음.
+        - ctx.req.headers.cookie 를 통해 쿠키를 가져올수있다.
+        - axios.defaults.headers.Cookie 에 쿠키를 넣어줌으로써 axios통신시 쿠키를 가지고 통신이 가능함.
+        - req res 객체가 존재함.
+        - ctx.isServer로 서버인지 판별이 가능.
+        - ctx.
+    - 클라이언트에서 실행될 경우
+        - 클라이언트에서 실행될 경우 브라우저가 알아서 쿠키를 넣어줌
+        - req, res 객체가 존재하지않기때문에 req 객체를 사용하면 에러가 발생함 
+        - ctx.isServer로 서버인지 분기필요
+```javascript
+ReactBird.getInitialProps = async (context) => {
+  const { ctx } = context;
+  let pageProps = {};
+
+  // 클라이언트 일경우에는 req, res 객체가 존재하지않음.
+  const cookie = ctx.isServer ? ctx.req.headers.cookie : ''; // 서버사이드 렌더링시에는 쿠키를 직접 넣어주어야함.
+  if (ctx.isServer && cookie) { // 클라이언트일 경우에는 쿠키를 심어줄 필요가없음
+      axios.defaults.headers.Cookie = cookie; // axios에 쿠키데이터를 심어주도록 설정
+  }
+
+  const state = ctx.store.getState(ctx); // ctx.store 를 통해 리듀서 스테이트를 가져올수 있음.
+  if (!state.user.me) {
+      ctx.store.dispatch({
+          type: LOAD_USER_REQUEST,
+      });
+  }
+
+  if (context.Component.getInitialProps) {
+      pageProps = await context.Component.getInitialProps(ctx);
+  }
+
+  return { pageProps };
+};
+```
