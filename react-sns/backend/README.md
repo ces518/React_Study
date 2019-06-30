@@ -1525,3 +1525,57 @@ router.get('/:id/followers', isLoggedIn, async (req, res ,next) => {
     }
 });
 ```
+
+# 인피니트 스크롤링방식 게시글조회
+- lastId가 0 일경우 처음부터조회
+- lastId가 존재할경우 해당 lastId보다 작은 게시글들을 조회한다.
+- 시퀄라이즈 조건
+    - [db.Sequelize.Op]: 연산자 Operator 에 조건들이 들어있음.
+    - [db.Sequelize.Op.lt]: ~ 보다 작은경우를 조회
+```javascript
+
+// 게시글 목록조회
+router.get('/', async (req, res, next) => {
+    try {
+        let where = {};
+        if (parseInt(req.query.lastId, 10)) {
+            where = {
+                id: {
+                    [db.Sequelize.Op.lt]: parseInt(req.query.lastId, 10),
+                }
+            };
+        }
+
+        const posts = await db.Post.findAll({
+            where,
+            include:[{
+                model: db.User,
+                attribute: ['id', 'nickname'],
+            }, {
+                model: db.Image,
+            }, {
+                model: db.User,
+                through: 'Like',
+                as: 'Likers',
+                attributes: ['id'],
+            }, {
+                model: db.Post,
+                as: 'Retweet',
+                include: [{
+                    model: db.User,
+                    attributes: ['id', 'nickname'],
+                }, {
+                    model: db.Image,
+                }],
+            }],
+            order: [['createdAt', 'DESC']], // 등록일로 내림차순 정렬
+            limit: parseInt(req.query.limit, 10),
+        }); // 모든 게시글조회
+        return res.json(posts); // 기본적으로는 .toJSON() 을 안붙여도됨
+            // DB객체를 변형할경우 toJSON() 으로 변형해주어야한다.
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+```

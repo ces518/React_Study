@@ -4,7 +4,17 @@ const router = express.Router();
 
 router.get('/:tag', async (req, res, next) => {
     try {
+        let where = {};
+        if (parseInt(req.query.lastId, 10)) {
+            where = {
+                id: {
+                    [db.Sequelize.Op.lt]: parseInt(req.query.lastId, 10),
+                }
+            };
+        }
+
         const posts = await db.Post.findAll({
+            where,
             include: [{
                 model: db.Hashtag,
                 where: {
@@ -30,6 +40,8 @@ router.get('/:tag', async (req, res, next) => {
                     model: db.Image,
                 }],
             }],
+            order: [['createdAt', 'DESC']], // 등록일로 내림차순 정렬
+            limit: parseInt(req.query.limit, 10),
         });
         console.log(posts);
         res.json(posts);

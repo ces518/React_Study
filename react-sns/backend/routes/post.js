@@ -24,7 +24,17 @@ const upload = multer({
 // 게시글 목록조회
 router.get('/', async (req, res, next) => {
     try {
+        let where = {};
+        if (parseInt(req.query.lastId, 10)) {
+            where = {
+                id: {
+                    [db.Sequelize.Op.lt]: parseInt(req.query.lastId, 10),
+                }
+            };
+        }
+
         const posts = await db.Post.findAll({
+            where,
             include:[{
                 model: db.User,
                 attribute: ['id', 'nickname'],
@@ -45,7 +55,8 @@ router.get('/', async (req, res, next) => {
                     model: db.Image,
                 }],
             }],
-            order: [['createdAt', 'DESC']] // 등록일로 내림차순 정렬
+            order: [['createdAt', 'DESC']], // 등록일로 내림차순 정렬
+            limit: parseInt(req.query.limit, 10),
         }); // 모든 게시글조회
         return res.json(posts); // 기본적으로는 .toJSON() 을 안붙여도됨
             // DB객체를 변형할경우 toJSON() 으로 변형해주어야한다.
