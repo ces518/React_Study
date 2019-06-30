@@ -16,25 +16,7 @@ export const initialState = {
     isAddingComment: false, // 댓글 작성중
     addCommentErrorReason: '', // 댓글 작성실패 이유
     commentAdded: false, // 댓글 작성 성공
-};
-
-const dummyPost = {
-    id: 2,
-    user: {
-      id: 1,
-      nickname: '준영'
-    },
-    content: '더미',
-    comments: [],
-};
-
-const dummyComment = {
-    user: {
-        id: 1,
-        nickname: '준영',
-    },
-    createdAt: new Date(),
-    content: '더미댓글입니다',
+    hasMorePost: false,
 };
 
 export const LOAD_MAIN_POSTS_REQUEST = 'LOAD_MAIN_POSTS_REQUEST';
@@ -162,15 +144,17 @@ const reducer = (state = initialState, action) => {
         case LOAD_MAIN_POSTS_REQUEST: {
             return {
                 ...state,
+                mainPosts: !action.lastId ? [] : state.mainPosts,
+                hasMorePost: action.lastId ? state.hasMorePost: true,
             }
         }
         case LOAD_USER_POSTS_SUCCESS:
         case LOAD_HASHTAG_POSTS_SUCCESS:
         case LOAD_MAIN_POSTS_SUCCESS: {
-            console.log(action.data);
             return {
                 ...state,
-                mainPosts: action.data,
+                mainPosts: state.mainPosts.concat(action.data),
+                hasMorePost: action.data.length === 10,
             }
         }
         case LOAD_COMMENTS_FAILURE:

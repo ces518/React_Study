@@ -1,4 +1,4 @@
-import { all, fork, takeLatest, delay, put, call } from 'redux-saga/effects';
+import { all, fork, takeLatest, throttle, put, call } from 'redux-saga/effects';
 import {
     ADD_POST_FAILURE,
     ADD_POST_REQUEST,
@@ -153,7 +153,7 @@ function* loadMainPosts (action) {
 }
 
 function* watchLoadMainPosts () {
-    yield takeLatest(LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
+    yield throttle(2000, LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
 }
 ////////////
 
@@ -179,7 +179,7 @@ function* loadHashtagPosts(action) {
 }
 
 function* watchLoadHashtagPosts () {
-    yield takeLatest(LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+    yield throttle(2000, LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
 }
 ////////////////
 

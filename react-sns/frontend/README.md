@@ -3548,3 +3548,21 @@ function* loadFollowings (action) {
         }
     }, [mainPosts.length]);
 ```
+
+# 쓰로들링
+- 스크롤링 이벤트가 ms 단위로 발생하기때문에 REQUEST가 연속적으로 발생한다.
+- SAGA에서 takeLastest (가장 마지막 요청만 유효하게함) 를 했더라도 앞쪽의 요청을 막을수는 없다.
+- 서버부하가 발생함.
+- 이를 막기위해 쓰로들링기법이 필요
+
+
+### 쓰로들링이란 ?
+- 특정 이벤트가 발생했을때 특정 시간동안 해당 이벤트를 막는 기법
+
+- SAGA에서 throttle을 제공함.
+- 2초동안 발생하지않도록 제어
+```javascript
+function* watchLoadMainPosts () {
+    yield throttle(2000, LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
+}
+```

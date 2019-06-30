@@ -171,7 +171,6 @@ router.delete('/:id/follow', isLoggedIn, async (req, res, next) => {
 // 게시글 가져오기
 router.get('/:id/posts', async (req, res, next) => {
     try {
-        console.log('posts = ', parseInt(req.params.id, 10) || (req.user && req.user.id) || 0);
         const posts = await db.Post.findAll({
             where: {
                 UserId: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
