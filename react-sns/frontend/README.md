@@ -3503,3 +3503,48 @@ function* loadFollowings (action) {
 # 더보기 버튼 삭제
 - 더이상 불러올 데이터가 없을경우 더보기 버튼 삭제.
 - hasMoreXX 플래그값 활용 제어 
+
+
+# 인피니트 스크롤링
+- 메인 게시글을 10개정도 불러온뒤 스크롤이 어느정도 내려가면 추가로 불러오기
+- 스크롤을 감지하는것이 핵심.
+
+- window.scrollY: 보이는 화면 최상단의 위치
+- document.documentElement.clientHeight: 보이는 화면의 크기
+- document.documentElement.scrollHeight: 스크롤의 크기
+- 끝에서 300정도 남았을때 다음게시글을 로드
+
+#### 문제점
+- 기존의 offset 방식으로 가져오게될경우 문제가 발생한다.
+- 스크롤링 방식으로 게시글을 가져올때 게시글을 보는동안 누군가 게시글을 작성할 수도 있다.
+- 기존의 offset이 깨져버림.
+- lastId 를 기반으로 조회하는 방식을 선택
+    - lastId가 0 일경우 처음부터 조회
+    - lastId가 존재할경우 해당 lastId보다 작은게시글들을 조회해온다.
+```javascript
+   // 보고있는동안 게시글을 작성할 수 있을수 있기때문에
+    // 게시글이 추가된다면 offset이 깨져버린다.
+    // 따라서 offset을 사용하면안됨.
+    // 마지막 게시글 번호를 활용해서 그 다음 게시글을 가져오는 방법을 사용.
+    const onScroll = () => {
+        console.log(window.scrollY, document.documentElement.clientHeight, document.documentElement.scrollHeight);
+        // window.scrollY 가 최상단의 위치
+        // documentElement.clientHeight 는 보이는 화면 크기
+        // scrollHeight 는 스크롤의 젤위에서 젤 아래크기
+        // 끝부분에서 300정도 남았을경우 다음데이터를 가져옴
+        if (window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300) {
+            dispatch({
+                type: LOAD_MAIN_POSTS_REQUEST,
+                lastId: mainPosts[mainPosts.length - 1].id,
+            });
+        }
+    };
+
+    useEffect(() => {
+        // addEventListener 를 달아주어야함.
+        window.addEventListener('scroll', onScroll);
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+        }
+    }, [mainPosts.length]);
+```
