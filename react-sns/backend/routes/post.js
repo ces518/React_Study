@@ -139,6 +139,27 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     }
 });
 
+// 단일 게시글 조회
+router.get('/:id', async (req, res, next) => {
+    try {
+        const post = await db.Post.findOne({
+            where: {
+                id: parseInt(req.params.id, 10)
+            },
+            include: [{
+                model: db.User,
+                attributes: ['id', 'nickname'],
+            }, {
+                model: db.Image,
+            }]
+        });
+        res.json(post);
+    } catch (e) {
+        console.error(e);
+        return next(e);
+    }
+});
+
 
 // 이미지 등록
 // upload.array('name')이 폼에서 넘기는 명을 지정해준다.

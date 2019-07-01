@@ -19,6 +19,7 @@ export const initialState = {
     addCommentErrorReason: '', // 댓글 작성실패 이유
     commentAdded: false, // 댓글 작성 성공
     hasMorePost: false,
+    singlePost: null,
 };
 
 export const LOAD_MAIN_POSTS_REQUEST = 'LOAD_MAIN_POSTS_REQUEST';
@@ -67,6 +68,9 @@ export const REMOVE_POST_REQUEST = 'REMOVE_POST_REQUEST';
 export const REMOVE_POST_SUCCESS = 'REMOVE_POST_SUCCESS';
 export const REMOVE_POST_FAILURE = 'REMOVE_POST_FAILURE';
 
+export const LOAD_POST_REQUEST = 'LOAD_POST_REQUEST';
+export const LOAD_POST_SUCCESS = 'LOAD_POST_SUCCESS';
+export const LOAD_POST_FAILURE = 'LOAD_POST_FAILURE';
 
 const reducer = (state = initialState, action) => {
     return produce(state, (draft) => {
@@ -225,6 +229,16 @@ const reducer = (state = initialState, action) => {
                 return {
                     ...state,
                 }
+            }
+            case LOAD_POST_REQUEST: {
+                break;
+            }
+            case LOAD_POST_SUCCESS: {
+                draft.singlePost = action.data;
+                break;
+            }
+            case LOAD_POST_FAILURE: {
+                break;
             }
             default: {
                 return {

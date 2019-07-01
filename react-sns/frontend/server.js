@@ -31,6 +31,10 @@ app.prepare().then(() => {
         }
     }));
 
+    server.get('/post/:id', (req, res) => {
+        return app.render(req, res, '/post', { id: req.params.id });
+    });
+
     server.get('/hashtag/:tag', (req, res) => { // next가 동적인 파라메터를 처리할수 없기때문에  express로 처리를해주는것
        return app.render(req, res, '/hashtag', { tag: req.params.tag });
     });

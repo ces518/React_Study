@@ -3632,3 +3632,52 @@ case ADD_COMMENT_SUCCESS: {
         }
     }, [hasMorePost, mainPosts.length]);
 ```
+
+# 개별포스트 불러오기
+- 동적 라우팅이기 때문에 server.js 에도 별도 작업이 필요
+```javascript
+    server.get('/post/:id', (req, res) => {
+        return app.render(req, res, '/post', { id: req.params.id });
+    });
+```
+- post.js
+```javascript
+import React from 'react';
+import { useSelector } from "react-redux";
+import PropTypes from 'prop-types';
+import { LOAD_POST_REQUEST } from '../reducers/post';
+
+const Post = ({ id }) => {
+    const { singlePost } = useSelector(state => state.post);
+    return (
+        <>
+            <div itemScope="content">{singlePost.content}</div>
+            <div itemScope="author">{singlePost.User.nickname}</div>
+            <div>{singlePost.Images[0] && <img src={`http://localhost:3065/${singlePost.Images[0].src}`} />}</div>
+        </>
+    );
+};
+
+
+Post.getInitialProps = async (context) => {
+    context.store.dispatch({ // 게시글 하나만 불러오는 액션
+        type: LOAD_POST_REQUEST,
+        data: context.query.id,
+    });
+    return { id: parseInt(context.query.id, 10) };
+};
+
+Post.propTypes = {
+    id: PropTypes.number.isRequired,
+};
+
+export default Post;
+```
+- 검색 엔진이 봤을때는 무엇이 컨텐츠인지 작성자인지 등 파악이 어려움
+- 검색엔진 최적화를 위해 크게 두가지방법을 사용
+    - 1. meta 태그에 작성
+    - 2. schema.org 에 따라 HTML 에 속성을 넣어주는 방법
+    - 현재페이지에서 어떤 정보가 어떤역할을 한다고 알려줌.
+
+- 카카오톡 링크로 공유를 하거나 했을때
+    - 이미지 타이틀 설명이 나오는것이 메타태그르 사용하는방법
