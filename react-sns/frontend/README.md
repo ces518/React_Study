@@ -3602,3 +3602,33 @@ case ADD_COMMENT_SUCCESS: {
     break;
 }
 ```
+
+# 프론트에서 리덕스 액션 호출 막기
+- throttle을 사용하더라도 요청과 완료가 2번씩 일어나는 문제가 발생함. 
+    - 의도한 것은 요청이 1회만 가도록 하는것.
+- 사가와 리듀서 액션은 별개로 동작하기때문에 별도 처리가 필요함
+
+- useRef 를 사용하여 요청을 보냈던 lastId를 기억해둠
+- 요청을 보냈던 lastId로 다시 요청을 보낸다면 요청을 막아버린다.
+```javascript
+    const countRef = useRef([]);
+    const onScroll = useCallback(() => {
+        console.log(window.scrollY, document.documentElement.clientHeight, document.documentElement.scrollHeight);
+        // window.scrollY 가 최상단의 위치
+        // documentElement.clientHeight 는 보이는 화면 크기
+        // scrollHeight 는 스크롤의 젤위에서 젤 아래크기
+        // 끝부분에서 300정도 남았을경우 다음데이터를 가져옴
+        if (window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300) {
+            if (hasMorePost) {
+                const lastId = mainPosts[mainPosts.length - 1].id;
+                if (!countRef.current.includes(lastId)) { // 한번 보냈던 lastId는 보내지않도록
+                    dispatch({
+                        type: LOAD_MAIN_POSTS_REQUEST,
+                        lastId: lastId,
+                    });
+                    countRef.current.push(lastId);
+                }
+            }
+        }
+    }, [hasMorePost, mainPosts.length]);
+```

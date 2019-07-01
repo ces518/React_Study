@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
@@ -10,7 +10,7 @@ const Home = () => {
     // state는 전체를 의미한다.
     const { me } = useSelector(state => state.user);
     const { mainPosts, hasMorePost } = useSelector(state => state.post);
-
+    const countRef = useRef([]);
 
     // 보고있는동안 게시글을 작성할 수 있을수 있기때문에
     // 게시글이 추가된다면 offset이 깨져버린다.
@@ -24,10 +24,14 @@ const Home = () => {
         // 끝부분에서 300정도 남았을경우 다음데이터를 가져옴
         if (window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300) {
             if (hasMorePost) {
-                dispatch({
-                    type: LOAD_MAIN_POSTS_REQUEST,
-                    lastId: mainPosts[mainPosts.length - 1].id,
-                });
+                const lastId = mainPosts[mainPosts.length - 1].id;
+                if (!countRef.current.includes(lastId)) { // 한번 보냈던 lastId는 보내지않도록
+                    dispatch({
+                        type: LOAD_MAIN_POSTS_REQUEST,
+                        lastId: lastId,
+                    });
+                    countRef.current.push(lastId);
+                }
             }
         }
     }, [hasMorePost, mainPosts.length]);
