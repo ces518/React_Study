@@ -3566,3 +3566,39 @@ function* watchLoadMainPosts () {
     yield throttle(2000, LOAD_MAIN_POSTS_REQUEST, loadMainPosts);
 }
 ```
+
+- 에러 로깅을 잘하는 습관 들이기
+
+# immer로 불변성 쉽게 사용
+- reducer에서 불변성을 지키는 부분인데 가독성이 좋지않음.
+- immer 설치
+    - npm i immer
+
+- 사용방법
+```javascript
+import produce from 'immer';
+
+return produce(state, (draft) => {
+    ... 기존 switch ...  
+});
+```
+
+- 예제
+    - 기존에 불변성을 지켜주기위해 길었던 로직이 단순해짐
+    - 삭제 => findIndex, splice 사용
+    - 뒤에 추가 => concat or forEach로 push
+    - 앞에 추가 => unshift 
+    - 불변성을 지켜주고 가독성은 좋아진다.
+    - 스프레드가 쓰이는곳은 Immer가 쓰일수 있음
+```javascript
+case ADD_COMMENT_SUCCESS: {
+    /*
+    * 불변성을 지켜줘야하기 때문에 로직이 복잡해짐
+    * */
+    const postIndex = state.mainPosts.findIndex(v => v.id === action.data.postId);
+    draft.mainPosts[postIndex].Comments.push(action.data.comment);
+    draft.isAddingComment = false;
+    draft.commentAdded = true;
+    break;
+}
+```
