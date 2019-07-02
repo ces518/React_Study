@@ -3896,3 +3896,54 @@ class MyDocument extends Document {
 
 export default MyDocument;
 ```
+
+# Styled-Components
+- 기존에 css를 인라인으로 사용한것들을 리액트에서 개선방안으로 제공
+- 설치
+    - npm i styled-components
+  
+- ImageZoom.js  
+```javascript
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import { Icon } from 'antd';
+import Slick from 'react-slick';
+import styled from 'styled-components';
+
+const Overlay = styled.div`
+    position: fixed;
+    z-indexL 5000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+`; // Overlay라는 스타일 컴포넌트를 만든것  div를 Overlay 로 교체하면됨
+
+const Header = styled.header`
+    height: 44px;
+    background: white;
+    position: relative;
+    padding: 0;
+    text-align: center;
+`;
+
+const H1 = styled.h1`
+    margin: 0;
+    font-size: 17px;
+    color: #333;
+    line-height: 44px;
+`;
+
+const CloseBtn = styled(Icon)`
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 15;
+    line-height: 14px;
+    cursor: pointer;
+`;
+```
+- antd 컴포넌트도 styledComponent로 만들수있음.
+- 모듈로 만들어서 다른파일에서도 사용할수 있음.
+- 각 태그들에 의미있는 이름을 부여할수있어서 좋음.
+- react dev-tools 에서 styled-div 형식으로 컴포넌트로 표시됨.
