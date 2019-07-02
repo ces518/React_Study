@@ -3947,3 +3947,21 @@ const CloseBtn = styled(Icon)`
 - 모듈로 만들어서 다른파일에서도 사용할수 있음.
 - 각 태그들에 의미있는 이름을 부여할수있어서 좋음.
 - react dev-tools 에서 styled-div 형식으로 컴포넌트로 표시됨.
+
+# styled-components 사용 팁
+- 매 태그마다 변수명을 지어주어야해서 꺼리는 경우도 있음.
+- scss, sass 방식과같이 하위 태그를 선택해서 styled-components 를 만드는것을 줄일수있음.
+```javascript
+const CloseBtn = styled(Icon)`
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 15;
+    line-height: 14px;
+    cursor: pointer;
+    
+    & > span {
+        text-align: center;
+    }
+`;
+```
