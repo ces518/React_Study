@@ -1,4 +1,6 @@
 import React from 'react';
+import Helmet from 'react-helmet';
+import PropTypes from 'prop-types';
 import Document, { Main, NextScript } from 'next/document';
 
 // main = app.js
@@ -7,13 +9,15 @@ import Document, { Main, NextScript } from 'next/document';
 * */
 class MyDocument extends Document {
     static getInitialProps (context) {
-        return { helmet: Helmet.renderStatic() };
+        const page = context.renderPage((App) => (props) => <App {...props}/>); // renderPage로 내부페이지를 랜더링 할수있게함
+        return { ...page, helmet: Helmet.renderStatic() };
     }
 
     render () {
         const { htmlAttributes, bodyAttributes, ...helmet } = this.props.helmet;
         const htmlAttrs = htmlAttributes.toComponent();
         const bodyAttrs = bodyAttributes.toComponent();
+        console.log(helmet);
         return (
             <html {...htmlAttrs}>
                 <head>
@@ -28,5 +32,8 @@ class MyDocument extends Document {
     }
 };
 
-// htmlAttributes html 속성
-// bodyAttributes body 속성
+MyDocument.propTypes = {
+    helmet: PropTypes.object.isRequired,
+}
+
+export default MyDocument;

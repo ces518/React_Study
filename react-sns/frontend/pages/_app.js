@@ -1,5 +1,5 @@
 import React from 'react';
-import Head from "next/head";
+import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
 import withRedux from 'next-redux-wrapper';
 import { createStore, compose, applyMiddleware } from 'redux';
@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 import withReduxSaga from 'next-redux-saga';
 import axios from 'axios';
+import { Container } from 'next/app';
 import { LOAD_USER_REQUEST } from "../reducers/user";
 import AppLayout from "../components/AppLayout";
 import reducer from '../reducers';
@@ -14,18 +15,38 @@ import rootSaga from '../sagas/index';
 
 const ReactBird = ({ Component, store, pageProps }) => {
   return (
-      <Provider store={store}>
-          <Head>
-              <title>React-SNS</title>
-              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css"/>
-              <link rel="stylesheet" type="text/css" charSet="UTF-8" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
-              <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
-              <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js"></script>
-          </Head>
-          <AppLayout>
-            <Component { ...pageProps }/>
-          </AppLayout>
-      </Provider>
+      <Container>
+          <Provider store={store}>
+              <Helmet
+                title="React-SNS"
+                htmlAttributes={{ lang: 'ko'}}
+                meta={[{
+                    charset: 'UTF-8',
+                }, {
+                    'http-equive': 'X-UA-Compatible', content: 'IE-edge',
+                }, {
+                    name: 'description', content: 'ces518의 ReactBird-SNS',
+                }, {
+                    property: 'og:type', content: 'website',
+                }, {
+                    property: 'og:description', content: 'ces518의 ReactBird-SNS'
+                }]}
+                link={[{
+                    rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css',
+                }, {
+                    rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css'
+                }, {
+                    rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css'
+                }]}
+                script={[{
+                    src: 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js'
+                }]}
+              />
+              <AppLayout>
+                <Component { ...pageProps }/>
+              </AppLayout>
+          </Provider>
+      </Container>
     )
 };
 
@@ -66,7 +87,6 @@ const configureStore = (initialState, options) => {
     // 발생할 여지가 존재하기때문에 configureStore에서 생성하는것으로 변경
 
     const middlewares = [sagaMiddleware, (store) => (next) => (action) => {
-        console.log(action);
         next(action);
     }]; // redux - saga middleware 연결
     const enhancer = process.env.NODE_ENV === 'production' ?

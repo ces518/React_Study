@@ -3789,3 +3789,110 @@ class MyDocument extends Document {
     }
 };
 ```
+
+
+# React - Helmet SSR
+- _app.js 의 헤드를 Helmet으로 대체
+    - app.js 가 공통부분이기때문에 모든 페이지에 적용된다.
+    - 하위 컴포넌트에 Helmet 이 존재한다면 하위컴포넌트의 헬멧 속성이 오버라이딩함.
+```javascript
+<Helmet
+title="React-SNS"
+htmlAttributes={{ lang: 'ko'}}
+meta={[{
+    charset: 'UTF-8',
+}, {
+    'http-equive': 'X-UA-Compatible', content: 'IE-edge',
+}, {
+    name: 'description', content: 'ces518의 ReactBird-SNS',
+}, {
+    property: 'og:type', content: 'website',
+}]}
+link={[{
+    rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css',
+}, {
+    rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css'
+}, {
+    rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css'
+}]}
+script={[{
+    src: 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js'
+}]}
+/>
+```
+
+- _app.js 를 next/app 의 Container 로 감싸준다.
+```javascript
+import { Container } from 'next/app';
+
+<Container>
+  <Provider store={store}>
+      <Helmet
+        title="React-SNS"
+        htmlAttributes={{ lang: 'ko'}}
+        meta={[{
+            charset: 'UTF-8',
+        }, {
+            'http-equive': 'X-UA-Compatible', content: 'IE-edge',
+        }, {
+            name: 'description', content: 'ces518의 ReactBird-SNS',
+        }, {
+            property: 'og:type', content: 'website',
+        }]}
+        link={[{
+            rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css',
+        }, {
+            rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.css'
+        }, {
+            rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css'
+        }]}
+        script={[{
+            src: 'https://cdnjs.cloudflare.com/ajax/libs/antd/3.16.2/antd.js'
+        }]}
+      />
+      <AppLayout>
+        <Component { ...pageProps }/>
+      </AppLayout>
+  </Provider>
+</Container>
+```
+
+- _document.js
+    - context.renderPage 를 사용해서 _app.js 를 실행시켜줘야함
+    - app.js 에서 하위 컴포넌트들의 getInitialProps를 실행시켜준것처럼 실행해주어야 동작을함.
+```javascript
+import React from 'react';
+import Helmet from 'react-helmet';
+import Document, { Main, NextScript } from 'next/document';
+
+// main = app.js
+/*
+* next에서는 Document 상속
+* */
+class MyDocument extends Document {
+    static getInitialProps (context) {
+        const page = context.renderPage((App) => (props) => <App {...props}/>); // renderPage로 내부페이지를 랜더링 할수있게함
+        return { ...page, helmet: Helmet.renderStatic() };
+    }
+
+    render () {
+        const { htmlAttributes, bodyAttributes, ...helmet } = this.props.helmet;
+        const htmlAttrs = htmlAttributes.toComponent();
+        const bodyAttrs = bodyAttributes.toComponent();
+        console.log(helmet);
+        return (
+            <html {...htmlAttrs}>
+                <head>
+                    {Object.values(helmet).map(el => el.toComponent())}
+                </head>
+                <body {...bodyAttrs}>
+                    <Main />
+                    <NextScript />
+                </body>
+            </html>
+        );
+    }
+};
+
+export default MyDocument;
+```
