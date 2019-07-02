@@ -3681,3 +3681,111 @@ export default Post;
 
 - 카카오톡 링크로 공유를 하거나 했을때
     - 이미지 타이틀 설명이 나오는것이 메타태그르 사용하는방법
+
+
+# react-helmet 으로 head 태그 조작하기
+- meta, title script style을 관리가능하다.
+- 설치
+    - npm i react-helmet
+
+- Schema.org 참고
+- og: openGraph 의 약자
+    - 페이스북에서 만듦
+    - 거의 표준
+
+- Helmet 을 사용하여 meta 태그를 조작
+- og:~ 로 시작하는 속성은 property
+- Helmet도 클라이언트 사이드 랜더링이기때문에 서버사이드랜더링 처리를 따로해주어야함.
+- _document.js 파일 생성 
+```javascript
+import React from 'react';
+import { useSelector } from "react-redux";
+import PropTypes from 'prop-types';
+import { LOAD_POST_REQUEST } from '../reducers/post';
+import Helmet from 'react-helmet';
+
+const Post = ({ id }) => {
+    const { singlePost } = useSelector(state => state.post);
+    return (
+        <>
+            <Helmet
+                title={`${singlePost.User.nickname}님의 글`}
+                description={singlePost.content}
+                meta={[{
+                    name: 'description', content: singlePost.content,
+                }, {
+                    property: 'og:title', content: `${singlePost.User.nickname}님의 게시글`
+                }, {
+                    property: 'og:description', content: singlePost.content,
+                }, {
+                    property: 'og:image', content: singlePost.Images[0] && `http://localhost:3065/${singlePost.Images[0].src}`
+                }, {
+                    property: 'og:url', content: `http://localhost:3060/post/${id}`,
+                }]}
+            />
+            <div itemScope="content">{singlePost.content}</div>
+            <div itemScope="author">{singlePost.User.nickname}</div>
+            <div>{singlePost.Images[0] && <img src={`http://localhost:3065/${singlePost.Images[0].src}`} />}</div>
+        </>
+    );
+};
+
+
+Post.getInitialProps = async (context) => {
+    context.store.dispatch({ // 게시글 하나만 불러오는 액션
+        type: LOAD_POST_REQUEST,
+        data: context.query.id,
+    });
+    return { id: parseInt(context.query.id, 10) };
+};
+
+Post.propTypes = {
+    id: PropTypes.number.isRequired,
+};
+
+export default Post;
+
+```
+
+
+- _document.js
+    - React에서는 Component를 상속받지만 Next에서는 next/document를 상속받는다.
+    - getInitialProps 가 static Method
+    - Helmet.renderStatic() 을 리턴해줌
+    - props 로 Helmet의 속성들을 받을수 있게됨.
+    - htmlAttributes
+        - html 속성을 Helmet에서 제공하는것
+    - bodyAttributes 
+        - body 속성들을 Helmet에서 제공하는것
+    - attributes 들을 toComponent 함수로 리액트에서 사용할수 있게 컴포넌트화 해주어야함.
+```javascript
+import React from 'react';
+import Document, { Main, NextScript } from 'next/document';
+
+// main = app.js
+/*
+* next에서는 Document 상속
+* */
+class MyDocument extends Document {
+    static getInitialProps (context) {
+        return { helmet: Helmet.renderStatic() };
+    }
+
+    render () {
+        const { htmlAttributes, bodyAttributes, ...helmet } = this.props.helmet;
+        const htmlAttrs = htmlAttributes.toComponent();
+        const bodyAttrs = bodyAttributes.toComponent();
+        return (
+            <html {...htmlAttrs}>
+                <head>
+                    {Object.values(helmet).map(el => el.toComponent())}
+                </head>
+                <body {...bodyAttrs}>
+                    <Main />
+                    <NextScript />
+                </body>
+            </html>
+        );
+    }
+};
+```
