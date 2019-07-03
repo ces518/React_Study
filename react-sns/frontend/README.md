@@ -4028,3 +4028,61 @@ const onSearch = (value) => {
 - function a () {};
 - a() 뿐만아니라 a`` 백틱으로 호출이가능함.
     - taged Template Literal
+
+# 폴더구조와 _error.js
+- Components와 Containers 를 따로 분리한다
+- 분리기준 ?
+    - Containers
+        - action을 dispatch 하는 컴포넌트들
+    - Components
+        - 단순 랜더링만 하는 컴포넌트들
+
+- _error.js
+    - 서버일경우 context.res 가 존재함
+    - res와 err에 에러에 필요한 정보가 들어있다.
+```javascript
+import React from 'react';
+import PropTypes from 'prop-types';
+
+const MyError = ({ statusCode }) => {
+    return (
+        <div>
+            <h1>{statusCode} 에러발생</h1>
+        </div>
+    )
+};
+
+MyError.propTypes = {
+    statusCode: PropTypes.number,
+};
+
+MyError.defaultProps = {
+    statusCode: 400,
+};
+
+MyError.getInitialProps = async (context) => {
+    // 서버일경우 res 가 존재
+    // 에러에 필요한정보가 res나 err에 들어있으므로 props로 넣어준다.
+    const statusCode = context.res ? context.res.statusCode : context.err ? err.statusCode : null;
+    return { statusCode };
+};
+
+export default MyError;
+
+```         
+
+- Next/App 도 존재함 
+    - 공식문서에서는 App을 상속받으라고함.
+    - Container 로 에러가난다면 App을 상속받은 클래스 컴포넌트를 사용
+```javascript
+import App from 'next/app';
+class ReactBird extends App {
+    static getInitialProps(context) {
+        
+    }
+    
+    render () {
+        return ( ... );
+    }
+}
+```
