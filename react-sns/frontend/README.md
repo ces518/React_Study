@@ -4002,3 +4002,29 @@ class MyDocument extends Document {
     }
 };
 ```
+
+# 검색기능 
+- 서버의 주소와, 실제 프론트주소가 다르기때문에 실제주소와, URL 노출주소를 지정해준다.
+```javascript
+const onSearch = (value) => {
+    // 앞쪽이 내부 주소 , 뒤쪽이 실제 보이는 주소
+    // 이유 ?
+    // 서버주소와 실제 프론트앤드주소가 다르기때문..
+    Router.push({ pathname: '/hashtag', query: { tag: value } }, `/hashtag/${value}`);
+};
+```
+
+# 에러해결 
+- Warning: Prop `className` did not match. Server: "sc-kkGfuU jDldyj" Client: "sc-ifAKCX MDYqy"
+- 스타일드 컴포넌트 SSR문제 경우에는 해결하기 힘든부분
+    - 서버에서 랜더링하는것과 클라이언트에서 랜더링하는부분이 차이가 날수밖에 없음.
+
+# 팁
+- javascript + 는 형변환
+- 1 + 2 에서 + 
+- + 5 에서 + 는 다른 + 로 인식함.
+- 다항 + 와 단항 + 의 차이임.
+- + new Date(); 는 타임스탬프로 변경해줌.
+- function a () {};
+- a() 뿐만아니라 a`` 백틱으로 호출이가능함.
+    - taged Template Literal
