@@ -3965,3 +3965,40 @@ const CloseBtn = styled(Icon)`
     }
 `;
 ```
+
+# styled-components SSR
+- 검색엔진의 입장에서는 스타일링이 하나도 되어있지않음.
+- styled-components도 SSR을 해주어야함.
+
+- getInitialProps에서 작업을 해주어야함.
+```javascript
+import { ServerStyleSheet } from "styled-components";
+
+class MyDocument extends Document {
+    static getInitialProps (context) {
+        const sheet = new ServerStyleSheet();
+        const page = context.renderPage((App) => (props) => sheet.collectStyles(<App {...props}/>)); // renderPage로 내부페이지를 랜더링 할수있게함
+        const styleTags = sheet.getStyleElement();
+        return { ...page, helmet: Helmet.renderStatic(), styleTags };
+    }
+
+    render () {
+        const { htmlAttributes, bodyAttributes, ...helmet } = this.props.helmet;
+        const htmlAttrs = htmlAttributes.toComponent();
+        const bodyAttrs = bodyAttributes.toComponent();
+        console.log(helmet);
+        return (
+            <html {...htmlAttrs}>
+                <head>
+                    {this.props.styleTags}
+                    {Object.values(helmet).map(el => el.toComponent())}
+                </head>
+                <body {...bodyAttrs}>
+                    <Main />
+                    <NextScript />
+                </body>
+            </html>
+        );
+    }
+};
+```
