@@ -4086,3 +4086,20 @@ class ReactBird extends App {
     }
 }
 ```
+
+# prefetch
+- 최적화
+- 폼에서 주로 성능이슈가 많이 발생하는데
+- 작은 단위에서만 리랜더링이 발생하는경우 넘어가도 될 수준
+    - 로그인시 로그인폼에서만 리랜더링 발생
+
+- 메인에서 프로필페이지로 이동
+    - profile.js 가 없기때문에 불러오는시간이 발생 로딩이 발생함.
+    - next/link의 prefetch 기능을 사용
+    - 사용자가 자주이동할만한 페이지들 링크를 걸어줄때 prefetch 옵션을 걸어준다.
+    - 해당 페이지에 대한 js 까지 미리 불러옴
+    - 하지만 너무 남발한다면 코드스플리팅의 효과를 볼수없음.
+    - 단, 개발환경에선 효과를 볼수없으며, 배포환경에서 확인이가능하다.
+```javascript
+<Link href="/profile" prefetch key="twit"><a><div>짹짹<br/>{me.Posts.length}</div></a></Link>
+```
