@@ -4128,3 +4128,70 @@ module.exports = {
     },
 };
 ```
+
+# next-bundle analyzer
+- 설치
+    - npm i @zeit/next-bundle-analyzer 
+- 프론트서버와 프론트서버의 패키지들을 분석해준다.
+- 항상 플러그인들의 사용방법을 외우지말고 공식문서를 볼것.
+- next.config.js
+```javascript
+module.exports = withBundleAnalyzer({
+    distDir: '.next', // 빌드후 생성되는 파일 디렉토리
+    analyzeServer: ['server', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    analyzeBrowser: ['browser', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    bundleAnalyzeConfig: {
+        server: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/server.html',
+        },
+        browser: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/client.html',
+        },
+    },
+    webpack (config) { // config 에 next의 기본적인 웹팩 설정이 들어있다.
+        console.log('config', config);
+        console.log('rules', config.module.rules[0]);
+        const prod = process.env.NODE_ENV;
+        return { // 웹팩 설정들을 바꿈
+            ...config, // 기본설정 유지 후 오버라이딩
+            mode: prod === 'production' ? 'production' : 'development',
+            devtool: prod === 'production' ? 'hidden-source-map' : 'eval',
+
+        }
+    },
+});
+
+
+```
+
+- typescript 와 sass를 사용할경우 HOC 처럼 사용함.
+- 개발환경시: npm run dev
+- 배포환경시: npm run build, npm run start
+    - 빌드를 먼저하고, start를 한번 해준다. 
+    - 빌드시 production 모드로 생각할것.
+
+- 환경변수를 직접 넣는경우
+    - 키=벨류 형태로 앞쪽에 넣어준다.
+    - 단 맥이나, 리눅스환경에서만 가능하다.
+    - 윈도우환경에서 사용하려면 cross-env 플러그인을 설치해주어야함.
+    - npm i cross-env
+```
+"scripts": {
+"dev": "nodemon",
+"build": "BUNDLE_ANALYZE=both next build",
+"start": "NODE_ENV=production next start"
+},
+  
+"scripts": {
+  "dev": "nodemon",
+  "build": "cross-env BUNDLE_ANALYZE=both next build",
+  "start": "cross-env NODE_ENV=production next start"
+},
+```
+- 번들하나하나가 1메가가 넘지않도록 유지.
+- npm run build
+- npm run start 로 확인 
+
+- tree-shaking
