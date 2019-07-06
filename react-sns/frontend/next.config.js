@@ -20,9 +20,10 @@ module.exports = withBundleAnalyzer({
         console.log('config', config);
         console.log('rules', config.module.rules[0]);
         const prod = process.env.NODE_ENV;
+        console.log(prod);
         const plugins = [
-                ...config.plugins,
-                new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /^\.\/ko$/),
+            ...config.plugins,
+            new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /^\.\/ko$/),
         ];
 
         if (prod) { // 배포시에만 compression사용
@@ -34,6 +35,7 @@ module.exports = withBundleAnalyzer({
             mode: prod === 'production' ? 'production' : 'development',
             devtool: prod === 'production' ? 'hidden-source-map' : 'eval',
             module: {
+
                 ...config.module,
                 rules: [
                     ...config.module.rules,
@@ -46,7 +48,7 @@ module.exports = withBundleAnalyzer({
                     },
                 ],
             },
-            plugins,
+            plugins
         }
     },
 });

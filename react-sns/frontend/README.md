@@ -4369,3 +4369,65 @@ module.exports = withBundleAnalyzer({
     },
 });
 ```
+
+# 최적화
+- 좋아요 버튼을 클릭하는데 다른 게시글의 컴포넌트들까지 리랜더링이 발생한다 > 최적화 대상
+    - 최적화 방법 ?
+        - 가장쉬운 방법은 React.memo로 감싸준다.
+        - memo를 사용할때 주의할점
+            - props로 받아오는 객체가 복잡한 객체면 안된다.
+            - 얕은 비교만 하기때문에 리랜더링이 발생할 상황에서 리랜더링이 일어나지않을수있음. 
+    - 결과
+        - memo만 사용했을때 최적화가 제대로 되지않음.
+        - 좀더 세분화해서 쪼개주어야 제대로 동작할듯.
+        
+- 댓글 창에서 작성을하는데 전체가 리랜더링 발생 > 최적화대상
+    - Form 을 CommentForm 컴포넌트로 분리
+- 대부분의 리랜더링이 Form에서 발생함. Form은 컴포넌트로 따로 분리할것.
+- CommentForm.js
+```javascript
+import { Button, Form, Input } from "antd";
+import React, { useCallback, useEffect, useState } from "react";
+import { ADD_COMMENT_REQUEST } from "../reducers/post";
+import { useDispatch, useSelector } from "react-redux";
+
+const CommentForm = ({ post }) => {
+    const [ commentText, setCommentText ] = useState('');
+    const { me } = useSelector(state => state.user);
+    const dispatch = useDispatch();
+    const { isAddingComment, commentAdded } = useSelector(state => state.post);
+
+    useEffect(() => {
+        setCommentText('');
+    }, [commentAdded === true]);
+
+    const onChangeCommentText = useCallback((e) => {
+        setCommentText(e.target.value);
+    }, []);
+
+    const onSubmitComment = useCallback((e) => {
+        e.preventDefault();
+        if (!me) { // 로그인한 사용자만 가능하도록 처리
+            return alert('로그인이 필요합니다.');
+        }
+        return dispatch({
+            type: ADD_COMMENT_REQUEST,
+            data: {
+                postId: post.id,
+                content: commentText,
+            }
+        });
+    }, [me && me.id, commentText]); // 객체 말고 기본자료형을 넣어줄것.
+
+    return (
+        <Form onSubmit={onSubmitComment}>
+            <Form.Item>
+                <Input.TextArea rows={4} value={commentText} onChange={onChangeCommentText}/>
+            </Form.Item>
+            <Button type="primary" htmlType="submit" loading={isAddingComment}>삐약</Button>
+        </Form>
+    );
+};
+export default CommentForm;
+
+```

@@ -127,7 +127,9 @@ const reducer = (state = initialState, action) => {
                 draft.mainPosts[postIndex].Comments = action.data.comments;
                 break;
             }
-            case LOAD_COMMENTS_REQUEST:
+            case LOAD_COMMENTS_REQUEST: {
+                break;
+            }
             case LOAD_USER_POSTS_REQUEST:
             case LOAD_HASHTAG_POSTS_REQUEST:
             case LOAD_MAIN_POSTS_REQUEST: {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, memo } from "react";
 import { useSelector, useDispatch, } from "react-redux";
 import {Avatar, Button, Card, Comment, Form, Icon, Input, List, Popover} from "antd";
 import PropTypes from 'prop-types';
@@ -16,6 +16,7 @@ import PostCardContent from "./PostCardContent";
 import {FOLLOW_USER_REQUEST, UNFOLLOW_USER_REQUEST} from "../reducers/user";
 import styled from 'styled-components';
 import moment from 'moment';
+import CommentForm from "./CommentForm";
 
 moment.locale('ko'); // 모멘트 한글 설정
 
@@ -23,18 +24,12 @@ const CardWrapper = styled.div`
     margin-top: 10px;
 `;
 
-const PostCard = ({ post }) => {
+const PostCard = memo(({ post }) => {
     const [ commentFormOpened, setCommentFormOpened ] = useState(false);
-    const [ commentText, setCommentText ] = useState('');
     const { me } = useSelector(state => state.user);
-    const { isAddingComment, commentAdded } = useSelector(state => state.post);
     const dispatch = useDispatch();
 
     const liked = me && post.Likers && post.Likers.find(v => v.id === me.id);
-
-    useEffect(() => {
-        setCommentText('');
-    }, [commentAdded === true]);
 
     const onToggleComment = useCallback(() => {
       setCommentFormOpened(prev => !prev);
@@ -45,24 +40,6 @@ const PostCard = ({ post }) => {
           });
       }
     }, [post.id]);
-
-    const onChangeCommentText = useCallback((e) => {
-        setCommentText(e.target.value);
-    }, []);
-
-    const onSubmitComment = useCallback((e) => {
-        e.preventDefault();
-        if (!me) { // 로그인한 사용자만 가능하도록 처리
-            return alert('로그인이 필요합니다.');
-        }
-        return dispatch({
-            type: ADD_COMMENT_REQUEST,
-            data: {
-                postId: post.id,
-                content: commentText,
-            }
-        });
-    }, [me && me.id, commentText]); // 객체 말고 기본자료형을 넣어줄것.
 
     const onToggleLike = useCallback(() => {
         if (!me) {
@@ -173,12 +150,7 @@ const PostCard = ({ post }) => {
             </Card>
             { commentFormOpened && (
                 <>
-                    <Form onSubmit={onSubmitComment}>
-                        <Form.Item>
-                            <Input.TextArea rows={4} value={commentText} onChange={onChangeCommentText}/>
-                        </Form.Item>
-                        <Button type="primary" htmlType="submit" loading={isAddingComment}>삐약</Button>
-                    </Form>
+                    <CommentForm post={post}/>
                     <List
                         header={ `${post.comments ? post.comments.length : 0 } 댓글`}
                         itemLayout="horizontal"
@@ -197,7 +169,7 @@ const PostCard = ({ post }) => {
             )}
         </CardWrapper>
     )
-};
+});
 
 PostCard.proptypes = {
     post: PropTypes.shape({
