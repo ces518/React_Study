@@ -4195,3 +4195,177 @@ module.exports = withBundleAnalyzer({
 - npm run start 로 확인 
 
 - tree-shaking
+
+
+# tree-shaking
+- 자주 사용되는 날짜 라이브러리들
+    - moment
+    - luxon
+    - date-fns
+    
+- 날짜라이브러리 중에 자주사용되는 moment 설치
+    - npm i moment
+- moment 에서는 다국어를 지원한다. 
+    - 한글 설정
+    - moment.locale('ko');
+- moment를 사용하면 antd와 비슷한 문제가 발생함. 
+    - moment는 언어팩별로 분리되어있기때문에 tree-shaking이 가능함.
+
+- next.config.js
+```javascript
+const withBundleAnalyzer = require('@zeit/next-bundle-analyzer');
+
+module.exports = withBundleAnalyzer({
+    distDir: '.next', // 빌드후 생성되는 파일 디렉토리
+    analyzeServer: ['server', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    analyzeBrowser: ['browser', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    bundleAnalyzeConfig: {
+        server: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/server.html',
+        },
+        browser: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/client.html',
+        },
+    },
+    webpack (config) { // config 에 next의 기본적인 웹팩 설정이 들어있다.
+        console.log('config', config);
+        console.log('rules', config.module.rules[0]);
+        const prod = process.env.NODE_ENV;
+        return { // 웹팩 설정들을 바꿈
+            ...config, // 기본설정 유지 후 오버라이딩
+            mode: prod === 'production' ? 'production' : 'development',
+            devtool: prod === 'production' ? 'hidden-source-map' : 'eval',
+            plugin: [
+                ...config.plugin,
+                new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /^\.\/ko$/),
+            ],
+        }
+    },
+});
+```
+    
+- 사이클
+    - build > start
+    - 매번 빌드 후 start할순 없는노릇..
+- prestart 옵션이 존재함
+    - prestart 옵션에 build를 넣어준다.
+```javascript
+  "scripts": {
+    "dev": "nodemon",
+    "build": "BUNDLE_ANALYZE=both next build",
+    "prestart": "npm run build",
+    "start": "NODE_ENV=production next start"
+  },
+```
+
+- npm run start 를 실행하면 prestart가 실행되고 start가 실행됨
+- * poststart도 존재함.
+
+
+- antd tree-shaking
+    - bundle-analyzer 로 확인하면 tree-shaking이 제대로 되지않음..
+    - antd의 단점
+```javascript
+const withBundleAnalyzer = require('@zeit/next-bundle-analyzer');
+const webpack = require('webpack');
+
+module.exports = withBundleAnalyzer({
+    distDir: '.next', // 빌드후 생성되는 파일 디렉토리
+    analyzeServer: ['server', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    analyzeBrowser: ['browser', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    bundleAnalyzeConfig: {
+        server: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/server.html',
+        },
+        browser: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/client.html',
+        },
+    },
+    webpack (config) { // config 에 next의 기본적인 웹팩 설정이 들어있다.
+        console.log('config', config);
+        console.log('rules', config.module.rules[0]);
+        const prod = process.env.NODE_ENV;
+        return { // 웹팩 설정들을 바꿈
+            ...config, // 기본설정 유지 후 오버라이딩
+            mode: prod === 'production' ? 'production' : 'development',
+            devtool: prod === 'production' ? 'hidden-source-map' : 'eval',
+            module: {
+                ...config.module,
+                rules: [
+                    ...config.module.rules,
+                    {
+                        loader: 'webpack-ant-icon-loader',
+                        enforce: 'pre',
+                        include: [
+                            require.resolve('@ant-design/icons/lib/dist'),
+                        ],
+                    },
+                ],
+            },
+            plugins: [
+                ...config.plugins,
+                new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /^\.\/ko$/),
+            ],
+        }
+    },
+});
+```
+
+- gzip 압축
+    - npm i compression-webpack-plugin
+- 파일용량을 4분의1, 3분의1로 압축해주고 확장자를 gz으로 바꿔줌.
+- 배포 단계에서는 항상 압축을 해주는것이 좋음.
+    - 용량은 3분의1이지만 동일한 기능을한다.
+```javascript
+const withBundleAnalyzer = require('@zeit/next-bundle-analyzer');
+const webpack = require('webpack');
+const Compression = require('compression-webpack-plugin');
+
+module.exports = withBundleAnalyzer({
+    distDir: '.next', // 빌드후 생성되는 파일 디렉토리
+    analyzeServer: ['server', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    analyzeBrowser: ['browser', 'both'].includes(process.env.BUNDLE_ANALYZE),
+    bundleAnalyzeConfig: {
+        server: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/server.html',
+        },
+        browser: {
+            analyzerMode: 'static',
+            reportFilename: '../bundles/client.html',
+        },
+    },
+    webpack (config) { // config 에 next의 기본적인 웹팩 설정이 들어있다.
+        console.log('config', config);
+        console.log('rules', config.module.rules[0]);
+        const prod = process.env.NODE_ENV;
+        return { // 웹팩 설정들을 바꿈
+            ...config, // 기본설정 유지 후 오버라이딩
+            mode: prod === 'production' ? 'production' : 'development',
+            devtool: prod === 'production' ? 'hidden-source-map' : 'eval',
+            module: {
+                ...config.module,
+                rules: [
+                    ...config.module.rules,
+                    {
+                        loader: 'webpack-ant-icon-loader',
+                        enforce: 'pre',
+                        include: [
+                            require.resolve('@ant-design/icons/lib/dist'),
+                        ],
+                    },
+                ],
+            },
+            plugins: [
+                ...config.plugins,
+                new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /^\.\/ko$/),
+                prod && new Compression(),
+            ],
+        }
+    },
+});
+```

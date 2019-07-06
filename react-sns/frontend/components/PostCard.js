@@ -15,6 +15,9 @@ import {
 import PostCardContent from "./PostCardContent";
 import {FOLLOW_USER_REQUEST, UNFOLLOW_USER_REQUEST} from "../reducers/user";
 import styled from 'styled-components';
+import moment from 'moment';
+
+moment.locale('ko'); // 모멘트 한글 설정
 
 const CardWrapper = styled.div`
     margin-top: 10px;
@@ -156,13 +159,15 @@ const PostCard = ({ post }) => {
                             title={post.Retweet.User.nickname}
                             description={<PostCardContent postData={post.Retweet.content} />} // next 의 Link 태그로 바꾸어주어야함
                         />
+                        {moment(post.createdAt).format('yyyy.mm.dd')}
                     </Card>)
                     :
                     (<Card.Meta // 리트윗안한경우
                         avatar={<Link href={{ pathname: '/user', query: { id: post.User.id } }} as={`/user/${post.User.id}`}><a><Avatar>{post.User.nickname[0]}</Avatar></a></Link>}
                         title={post.User.nickname}
                         description={<PostCardContent postData={post.content} />} // next 의 Link 태그로 바꾸어주어야함
-                    />)
+                    />
+                    )
                 }
 
             </Card>
