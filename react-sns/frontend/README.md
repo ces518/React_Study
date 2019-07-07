@@ -4431,3 +4431,36 @@ const CommentForm = ({ post }) => {
 export default CommentForm;
 
 ```
+
+# 최적화 2
+- 팔로우, 언팔로우 버튼 최적화
+- me 객체 내부에 me.Followings의 값이 바뀌기 때문에 ME를 사용하는 컴포넌트가 전체적으로 리랜더링이 일어난다.
+
+- 해결방법 ?
+    - 팔로우 버튼을 컴포넌트로 분리
+    - postCard에서는 ME.id만 꺼내서 사용함.
+```javascript
+import React from "react";
+import { Button } from "antd";
+import PropTypes from 'prop-types';
+import { useSelector}  from "react-redux";
+
+const FollowButton = ({ post, onFollow, onUnFollow }) => {
+    const { me } = useSelector(state => state.user);
+    return (
+        !me || post.User.id === me.id
+        ? null
+        :
+        me.Followings && me.Followings.find(v => v.id == post.User.id) // 내 팔로윙 목록에 존재할경우
+            ? <Button onClick={onUnFollow(post.User.id)}>언팔로우</Button>
+            : <Button onClick={onFollow(post.User.id)}>팔로우</Button>
+    )
+};
+
+FollowButton.propTypes = {
+    post: PropTypes.object.isRequired,
+};
+
+export default FollowButton;
+
+```
