@@ -30,6 +30,8 @@ const ReactBird = ({ Component, store, pageProps }) => {
                     property: 'og:type', content: 'website',
                 }, {
                     property: 'og:description', content: 'ces518의 ReactBird-SNS'
+                }, {
+                    property: 'og:image', content: 'http://localhost:3060/favicon.io'
                 }]}
                 link={[{
                     rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css',

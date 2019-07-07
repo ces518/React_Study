@@ -4513,3 +4513,66 @@ export default FollowList;
     - 2. memo 사용
     - 3. state 나 useSelector 부분 확인
         - 객체가 대부분 원인 (객체의 내부가 바뀌어도 리랜더링)
+
+# 최종점검
+- IE 지원
+- 새로 추가된 객체들 을 사용할때
+    - polyfill추가 필요
+    - <script src="https://polyfill.io/v3/polyfill.min.js?features=es6,es7,es8,es9,NodeList.prototype.forEach&flags=gated" />
+
+- bundle-analyzer 가 변경되었음
+    - 설치
+    - npm i @next/bundle-analyzer
+ 
+```javascript
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: process.env.ANALYZE === 'true',
+});
+const webpack = require('webpack');
+const Compression = require('compression-webpack-plugin');
+
+module.exports = withBundleAnalyzer({
+    distDir: '.next', // 빌드후 생성되는 파일 디렉토리
+    webpack (config) { // config 에 next의 기본적인 웹팩 설정이 들어있다.
+        console.log('config', config);
+        console.log('rules', config.module.rules[0]);
+        const prod = process.env.NODE_ENV;
+        console.log(prod);
+        const plugins = [
+            ...config.plugins,
+            new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /^\.\/ko$/),
+        ];
+
+        if (prod) { // 배포시에만 compression사용
+            plugins.push(new Compression());
+        }
+
+        return { // 웹팩 설정들을 바꿈
+            ...config, // 기본설정 유지 후 오버라이딩
+            mode: prod === 'production' ? 'production' : 'development',
+            devtool: prod === 'production' ? 'hidden-source-map' : 'eval',
+            module: {
+
+                ...config.module,
+                rules: [
+                    ...config.module.rules,
+                    {
+                        loader: 'webpack-ant-icon-loader',
+                        enforce: 'pre',
+                        include: [
+                            require.resolve('@ant-design/icons/lib/dist'),
+                        ],
+                    },
+                ],
+            },
+            plugins
+        }
+    },
+});
+```
+ 
+    
+- 라이브러리 사용법을 외우지말것
+    - 키워드만 알고있을것.
+    - 사용방법이 빈번하게 바뀌기때문에 외우는것은 의미가없음.
+    

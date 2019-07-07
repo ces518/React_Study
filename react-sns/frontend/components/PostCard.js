@@ -133,7 +133,7 @@ const PostCard = memo(({ post }) => {
                             title={post.Retweet.User.nickname}
                             description={<PostCardContent postData={post.Retweet.content} />} // next 의 Link 태그로 바꾸어주어야함
                         />
-                        {moment(post.createdAt).format('yyyy.mm.dd')}
+                        {moment(post.createdAt).format('YYYY.MM.DD')}
                     </Card>)
                     :
                     (<Card.Meta // 리트윗안한경우
