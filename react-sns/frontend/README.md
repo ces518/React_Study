@@ -4464,3 +4464,52 @@ FollowButton.propTypes = {
 export default FollowButton;
 
 ```
+
+# 최적화 3
+- 프로필에서 팔로잉, 팔로워목록을 더보기 눌렀을때 다른부분까지 리랜더링이 일어난다
+- 다른 곳에 영향을 미치는부분을 컴포넌트로 분리할것.
+
+- FollowList.js
+```javascript
+import React, {memo} from 'react';
+import PropTypes from 'prop-types';
+import { Button, Card, Icon, List } from "antd";
+
+const FollowList = memo(({ data, header, hasMore, onClick, onClickStop }) => {
+    return (
+        <List
+            style={{ marginBottom: '20px' }}
+            grid={{ gutter: 4, xs: 2, md: 3 }}
+            size="smail"
+            header={<div>{header}</div>}
+            loadMore={hasMore ? <Button style={{ width: '100%' }} onClick={onClick}>더 보기</Button> : null}
+            bordered
+            dataSource={data}
+            renderItem={item => (
+                <List.Item style={{ marginTop: '20px' }}>
+                    <Card actions={[<Icon key="stop" type="stop" />]} onClick={onClickStop(item.id)}>
+                        <Card.Meta description={item.nickname}/>
+                    </Card>
+                </List.Item>
+            )}
+        />
+    )
+});
+
+FollowList.propTypes = {
+    header: PropTypes.string.isRequired,
+    hasMore: PropTypes.bool.isRequired,
+    onClick: PropTypes.func.isRequired,
+    onClickStop: PropTypes.func.isRequired,
+    data: PropTypes.array.isRequired,
+
+};
+
+export default FollowList;
+```
+
+- 최적화 사이클
+    - 1. 컴포넌트 분리
+    - 2. memo 사용
+    - 3. state 나 useSelector 부분 확인
+        - 객체가 대부분 원인 (객체의 내부가 바뀌어도 리랜더링)
