@@ -19,3 +19,14 @@
         - _app.js (모든 컴포넌트의 부모역할 공통 레이아웃 위치)
         - index.js (인덱스 페이지)
         - profile.js (프로필)
+
+
+### 2019 07 09
+- 회원가입 페이지 생성 
+    - signup.js
+
+- 로그인 폼 생성
+    - LoginForm.js
+
+- 회원상태 프로필 생성
+    - Profile.js
