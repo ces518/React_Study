@@ -1,6 +1,13 @@
 import React from 'react';
-import { Menu, Input } from "antd";
+import PropTypes from 'prop-types';
+import { Col, Input, Menu, Row } from "antd";
 import Link from "next/link";
+
+import Profile from './Profile';
+import LoginForm from './LoginForm';
+
+// 로그인 여부 임시 플래그변수
+const login = false;
 
 const Layout = ({ children }) => {
     return (
@@ -12,8 +19,28 @@ const Layout = ({ children }) => {
                     <Input.Search enterButton style={{ verticalAlign: 'middle' }} />
                 </Menu.Item>
             </Menu>
-            { children }
+            <Row>
+                <Col xs={24} md={6}>
+                    {login ?
+                        <Profile />
+                        :
+                        <LoginForm />
+                    }
+                </Col>
+                <Col xs={24} md={12}>
+                    { children }
+                </Col>
+                <Col xs={24} md={6}>
+
+                </Col>
+            </Row>
         </>
     )
 };
+
+Layout.propTypes = {
+    children: PropTypes.node,
+};
+
+
 export default Layout;
