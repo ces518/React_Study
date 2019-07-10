@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Col, Input, Menu, Row } from "antd";
 import Link from "next/link";
+import { useSelector } from "react-redux";
+import { Col, Input, Menu, Row } from "antd";
 
 import Profile from './Profile';
 import LoginForm from './LoginForm';
 
-// 로그인 여부 임시 플래그변수
-const login = false;
 
 const Layout = ({ children }) => {
+    const { info } = useSelector(state => state.user);
     return (
         <>
             <Menu mode="horizontal">
@@ -21,7 +21,7 @@ const Layout = ({ children }) => {
             </Menu>
             <Row>
                 <Col xs={24} md={6}>
-                    {login ?
+                    {info ?
                         <Profile />
                         :
                         <LoginForm />
