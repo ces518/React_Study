@@ -30,3 +30,37 @@
 
 - 회원상태 프로필 생성
     - Profile.js
+    
+
+### 2019 07 10
+- styled-component 설치
+    - npm i styled-components
+- Redux 설치
+    - npm i redux react-redux
+- next에 redux를 적용 next-redux-wrapper 설치
+    - npm i next-redux-wrapper
+    
+
+* 이슈
+    - Redux 사용시 아무런 액션을 정의하지 않았더라도 Reducer에서 default reducer를 구현해주어야함
+```javascript
+export const initialState = {
+    info: {
+        id: 0,
+        name: '준영',
+    }, // 로그인 정보
+};
+
+
+const reducer = (state = initialState, action) => {
+    switch (action) {
+        default: {
+            return {
+                ...state,
+            }
+        }
+    }
+};
+
+export default reducer;
+```
