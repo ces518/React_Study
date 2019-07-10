@@ -1,7 +1,9 @@
 import React from 'react';
 import { Card, Avatar } from 'antd';
+import { useSelector } from "react-redux";
 
 const Profile = () => {
+    const { info } = useSelector(state => state.user);
     return (
         <Card
             actions={[
@@ -11,8 +13,8 @@ const Profile = () => {
             ]}
         >
             <Card.Meta
-                avatar={<Avatar>{'준영'[0]}</Avatar>}
-                title={'준영'}
+                avatar={<Avatar>{info.nickname[0]}</Avatar>}
+                title={info.nickname}
             />
         </Card>
     )
