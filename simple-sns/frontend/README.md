@@ -64,3 +64,11 @@ const reducer = (state = initialState, action) => {
 
 export default reducer;
 ```
+
+### 2019 07 14
+- Redux SAGA 적용
+    - npm i redux-saga
+- Redux devTools 적용
+- 더미데이터 활용한 Login 구현
+- 더미데이터 활용한 Logout 구현
+
