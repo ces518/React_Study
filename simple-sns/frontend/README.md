@@ -72,3 +72,20 @@ export default reducer;
 - 더미데이터 활용한 Login 구현
 - 더미데이터 활용한 Logout 구현
 
+
+### 2019 07 23
+- 더미데이터 활용한 게시글 구현
+- 더미데이터 활용한 게시글 등록 구현
+
+* 이슈
+    - useEffect 사용시 논리값체크의 경우 ComponentDidUpdate가 제대로 동작하지않음
+    - postAdded 가 변경될때마다 호출됨
+```javascript
+// 최초 실행 : ComponentDidMounted
+// deps [] 의 값이바뀔때마다 실행: ComponentDidUpdate
+useEffect(() => {
+    if (postAdded) {
+        setText('');
+    }
+}, [postAdded === true]);
+```
